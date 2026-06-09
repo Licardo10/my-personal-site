@@ -35,6 +35,8 @@
     .btn-secondary:hover { background: #3f3f46; }
     .btn-danger { background: #ef4444; color: #fff; }
     .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #22c55e; color: #fff; }
+    .btn-success:hover { background: #16a34a; }
 
     .token-bar {
       background: #27272a; border-radius: 8px; padding: 12px 16px;
@@ -46,32 +48,62 @@
     .msg.success { display: block; background: #052e16; border: 1px solid #166534; color: #86efac; }
     .msg.error { display: block; background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; }
 
-    .flex { display: flex; gap: 10px; align-items: center; }
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-    .tag { background: #27272a; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+    .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    pre { background: #09090b; padding: 16px; border-radius: 8px; font-size: 13px; max-height: 400px; overflow: auto; }
     .hidden { display: none; }
+
+    .upload-area {
+      border: 2px dashed #27272a; border-radius: 8px; padding: 20px;
+      text-align: center; margin-bottom: 16px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #a78bfa; }
+    .upload-area.dragover { border-color: #a78bfa; background: #1a1a2e; }
+    .upload-area p { color: #71717a; font-size: 13px; margin-top: 8px; }
+    .image-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .image-item {
+      position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden;
+      border: 1px solid #27272a; cursor: pointer;
+    }
+    .image-item img { width: 100%; height: 100%; object-fit: cover; }
+    .image-item:hover { border-color: #a78bfa; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📝 Lika 后台</h1>
-    <p class="sub">在这里写文章，自动提交到 GitHub</p>
+    <p class="sub">写文章、传图片、管理内容</p>
 
     <div id="msg" class="msg"></div>
 
-    <!-- Token 设置 -->
+    <!-- Token -->
     <div class="token-bar">
       <input type="password" id="tokenInput" placeholder="输入 GitHub Token（repo 权限）" />
       <button class="btn btn-primary" onclick="saveToken()">保存</button>
     </div>
 
-    <!-- 文章列表 -->
-    <div id="postList" class="hidden">
+    <!-- 主界面 -->
+    <div id="mainUI" class="hidden">
+      <!-- 图片管理 -->
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+          <h2>🖼️ 图片管理</h2>
+          <label class="btn btn-success" style="font-size:13px;cursor:pointer">
+            + 上传图片
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="uploadImages(event)" />
+          </label>
+        </div>
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('imageInput').click()">
+          <p>拖拽图片到此处 或 点击选择图片</p>
+          <p style="font-size:12px;color:#52525b;">支持 PNG、JPG、GIF、WebP，建议压缩后上传</p>
+        </div>
+        <div id="imageList" class="image-list"></div>
+      </div>
+
+      <!-- 文章管理 -->
       <div class="card">
         <div class="flex" style="justify-content:space-between;margin-bottom:16px">
-          <h2>已有文章</h2>
+          <h2>📄 文章管理</h2>
           <button class="btn btn-primary" onclick="showEditor()">+ 新文章</button>
         </div>
         <div id="posts"></div>
@@ -100,7 +132,15 @@
         <label>简介</label>
         <textarea id="postExcerpt" placeholder="文章简介..." rows="2"></textarea>
         <label>正文（Markdown）</label>
-        <textarea id="postBody" placeholder="写文章内容，支持 Markdown 格式..." rows="12"></textarea>
+        <div class="flex" style="margin-bottom:8px">
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('**','**')"><b>粗体</b></button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('*','*')"><i>斜体</i></button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('## ','')">标题</button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('```\n','\n```')">代码块</button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('- ','')">列表</button>
+          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertImage()">🖼️ 图片</button>
+        </div>
+        <textarea id="postBody" placeholder="写文章内容，支持 Markdown 格式..." rows="16"></textarea>
         <div class="flex">
           <button class="btn btn-primary" onclick="publishPost()">📤 发布文章</button>
           <span id="publishStatus" style="color:#71717a;font-size:13px"></span>
@@ -116,20 +156,24 @@
     const branch = "main";
     const api = "https://api.github.com";
 
+    // ====== 工具函数 ======
+    function b64Encode(str) { return btoa(unescape(encodeURIComponent(str))); }
+    function b64Decode(str) { return decodeURIComponent(escape(atob(str.replace(/\n/g, "")))); }
+
     function showMsg(text, type) {
       const msg = document.getElementById("msg");
       msg.textContent = text;
-      msg.className = `msg ${type}`;
+      msg.className = "msg " + type;
       setTimeout(() => { msg.style.display = "none"; }, 5000);
     }
 
     function saveToken() {
       const val = document.getElementById("tokenInput").value.trim();
-      if (val) { localStorage.setItem("gh_token", val); token = val; showMsg("Token 已保存", "success"); loadPosts(); }
+      if (val) { localStorage.setItem("gh_token", val); token = val; showMsg("Token 已保存", "success"); init(); }
     }
 
     document.getElementById("tokenInput").value = token;
-    if (token) loadPosts();
+    if (token) init();
 
     async function gh(url, method = "GET", body = null) {
       const res = await fetch(api + url, {
@@ -138,58 +182,126 @@
       });
       if (!res.ok) {
         const err = await res.text();
-        throw new Error(`GitHub API: ${res.status} - ${err}`);
+        throw new Error("GitHub API: " + res.status + " - " + err);
       }
       return res.status === 204 ? null : await res.json();
     }
 
+    // ====== 初始化 ======
+    async function init() {
+      document.getElementById("mainUI").classList.remove("hidden");
+      loadPosts();
+      loadImages();
+      setupDragDrop();
+    }
+
+    // ====== 拖拽上传 ======
+    function setupDragDrop() {
+      const dz = document.getElementById("dropZone");
+      dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("dragover"); });
+      dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
+      dz.addEventListener("drop", e => {
+        e.preventDefault();
+        dz.classList.remove("dragover");
+        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+      });
+    }
+
+    async function uploadImages(e) {
+      if (e.target.files.length) handleFiles(e.target.files);
+      e.target.value = "";
+    }
+
+    async function handleFiles(files) {
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        const reader = new FileReader();
+        reader.onload = async function (ev) {
+          const base64 = ev.target.result.split(",")[1];
+          const name = Date.now() + "-" + file.name.replace(/[^a-zA-Z0-9._-]/g, "");
+          try {
+            await gh("/repos/" + repo + "/contents/public/images/" + name, "PUT", {
+              message: "上传图片: " + name,
+              content: base64, branch
+            });
+            showMsg("✅ 已上传: " + name, "success");
+            loadImages();
+          } catch (err) { showMsg("上传失败: " + name + " - " + err.message, "error"); }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // ====== 加载图片 ======
+    async function loadImages() {
+      try {
+        const data = await gh("/repos/" + repo + "/contents/public/images");
+        const container = document.getElementById("imageList");
+        if (Array.isArray(data)) {
+          const imgs = data.filter(f => /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name));
+          if (imgs.length === 0) { container.innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>'; return; }
+          container.innerHTML = "";
+          for (const img of imgs) {
+            const div = document.createElement("div");
+            div.className = "image-item";
+            div.title = "点击复制: /images/" + img.name;
+            div.onclick = function () {
+              navigator.clipboard.writeText("/images/" + img.name).then(() => {
+                showMsg("已复制: /images/" + img.name, "success");
+              });
+            };
+            div.innerHTML = '<img src="https://raw.githubusercontent.com/' + repo + '/main/public/images/' + img.name + '" alt="' + img.name + '" loading="lazy" />';
+            container.appendChild(div);
+          }
+        } else {
+          container.innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>';
+        }
+      } catch (e) { /* images dir may not exist */ document.getElementById("imageList").innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>'; }
+    }
+
+    // ====== 文章 ======
     async function loadPosts() {
       try {
-        document.getElementById("postList").classList.remove("hidden");
         const data = await gh("/repos/" + repo + "/contents/content/posts");
         const container = document.getElementById("posts");
         if (Array.isArray(data)) {
           const mdFiles = data.filter(f => f.name.endsWith(".md")).reverse();
-          if (mdFiles.length === 0) {
-            container.innerHTML = '<p style="color:#71717a">还没有文章</p>';
-          } else {
-            container.innerHTML = "";
-            for (const file of mdFiles) {
-              const content = await gh("/repos/" + repo + "/contents/content/posts/" + file.name);
-              const raw = atob(content.content.replace(/\n/g, ""));
-              const titleMatch = raw.match(/title:\s*["\']?([^"\'\n]+)/);
-              const title = titleMatch ? titleMatch[1] : file.name;
-              const div = document.createElement("div");
-              div.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a";
-              div.innerHTML = `<span>${title}</span>
-                <div class="flex">
-                  <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="editPost('${file.name}')">编辑</button>
-                  <button class="btn btn-danger" style="padding:6px 14px;font-size:12px" onclick="deletePost('${file.name}')">删除</button>
-                </div>`;
-              container.appendChild(div);
-            }
+          if (mdFiles.length === 0) { container.innerHTML = '<p style="color:#71717a">还没有文章</p>'; return; }
+          container.innerHTML = "";
+          for (const file of mdFiles) {
+            const content = await gh("/repos/" + repo + "/contents/content/posts/" + file.name);
+            const raw = b64Decode(content.content);
+            const m = raw.match(/title:\s*"?([^"\n]+)/);
+            const title = m ? m[1].trim() : file.name;
+            const div = document.createElement("div");
+            div.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a";
+            div.innerHTML = '<span>' + title + '</span>' +
+              '<div class="flex">' +
+              '<button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="editPost(\'' + file.name + '\')">编辑</button>' +
+              '<button class="btn btn-danger" style="padding:6px 14px;font-size:12px" onclick="deletePost(\'' + file.name + '\')">删除</button>' +
+              '</div>';
+            container.appendChild(div);
           }
         } else {
           container.innerHTML = '<p style="color:#71717a">还没有文章</p>';
         }
       } catch (e) {
-        if (e.message.includes("401") || e.message.includes("403")) {
-          showMsg("Token 无效或没有权限，请重新输入", "error");
-        } else {
-          showMsg("加载失败: " + e.message, "error");
-        }
+        if (e.message.includes("401") || e.message.includes("403")) showMsg("Token 无效或没有权限", "error");
+        else showMsg("加载失败: " + e.message, "error");
       }
     }
 
     function showEditor(slug) {
       editingSlug = slug || null;
       document.getElementById("editor").classList.remove("hidden");
+      document.getElementById("mainUI").classList.add("hidden");
       document.getElementById("editorTitle").textContent = slug ? "编辑文章" : "写新文章";
       if (slug) loadPostForEdit(slug);
     }
 
     function hideEditor() {
       document.getElementById("editor").classList.add("hidden");
+      document.getElementById("mainUI").classList.remove("hidden");
       document.getElementById("postTitle").value = "";
       document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
       document.getElementById("postTags").value = "";
@@ -203,15 +315,15 @@
     async function loadPostForEdit(slug) {
       try {
         const file = await gh("/repos/" + repo + "/contents/content/posts/" + slug);
-        const raw = atob(file.content.replace(/\n/g, ""));
+        const raw = b64Decode(file.content);
         const parts = raw.split("---");
         if (parts.length >= 3) {
           const meta = parts[1];
           const body = parts.slice(2).join("---").trim();
-          const title = meta.match(/title:\s*["\']?([^"'\n]+)/);
-          const date = meta.match(/date:\s*["\']?([^"'\n]+)/);
+          const title = meta.match(/title:\s*"?([^"\n]+)/);
+          const date = meta.match(/date:\s*"?([^"\n]+)/);
           const tags = meta.match(/tags:\s*\[([^\]]+)\]/);
-          const excerpt = meta.match(/excerpt:\s*["\']?([^"'\n]+)/);
+          const excerpt = meta.match(/excerpt:\s*"?([^"\n]+)/);
           if (title) document.getElementById("postTitle").value = title[1].trim();
           if (date) document.getElementById("postDate").value = date[1].trim();
           if (tags) document.getElementById("postTags").value = tags[1].split(",").map(t => t.trim().replace(/["']/g, "")).join(", ");
@@ -220,11 +332,29 @@
         }
         editingSlug = slug;
         document.getElementById("publishStatus").textContent = "（将覆盖原文件）";
-      } catch (e) {
-        showMsg("加载文章失败: " + e.message, "error");
-      }
+      } catch (e) { showMsg("加载文章失败: " + e.message, "error"); }
     }
 
+    // ====== 格式化工具栏 ======
+    function insertTag(before, after) {
+      const ta = document.getElementById("postBody");
+      const start = ta.selectionStart, end = ta.selectionEnd;
+      const text = ta.value;
+      ta.value = text.slice(0, start) + before + text.slice(start, end) + after + text.slice(end);
+      const pos = start + before.length + (end - start) + after.length;
+      ta.selectionStart = ta.selectionEnd = pos - after.length;
+      ta.focus();
+    }
+
+    function insertImage() {
+      const ta = document.getElementById("postBody");
+      const start = ta.selectionStart;
+      ta.value = ta.value.slice(0, start) + "![图片描述](/images/图片文件名.jpg)" + ta.value.slice(ta.selectionEnd);
+      ta.selectionStart = ta.selectionEnd = start + 6;
+      ta.focus();
+    }
+
+    // ====== 发布 ======
     async function publishPost() {
       const title = document.getElementById("postTitle").value.trim();
       const date = document.getElementById("postDate").value;
@@ -236,15 +366,12 @@
       const tags = tagsStr ? tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean) : ["其他"];
       const slug = editingSlug || title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-|-$/g, "") + ".md";
 
-      const content = `---
-title: "${title}"
-date: ${date}
-tags: [${tags.map(t => '"' + t + '"').join(", ")}]
-excerpt: "${excerpt}"
----
-
-${body}
-`;
+      const content = "---\n" +
+        'title: "' + title + '"\n' +
+        "date: " + date + "\n" +
+        "tags: [" + tags.map(t => '"' + t + '"').join(", ") + "]\n" +
+        'excerpt: "' + excerpt + '"\n' +
+        "---\n\n" + body + "\n";
 
       const status = document.getElementById("publishStatus");
       status.textContent = "发布中...";
@@ -255,24 +382,20 @@ ${body}
           try {
             const existing = await gh("/repos/" + repo + "/contents/content/posts/" + editingSlug);
             sha = existing.sha;
-          } catch (e) { /* 新文件 */ }
+          } catch (e) {}
         }
         await gh("/repos/" + repo + "/contents/content/posts/" + (editingSlug || slug), "PUT", {
           message: editingSlug ? "更新文章: " + title : "新文章: " + title,
-          content: btoa(unescape(encodeURIComponent(content))),
-          branch, sha
+          content: b64Encode(content), branch, sha
         });
         showMsg("✅ 文章已发布！等待自动部署...", "success");
         status.textContent = "✅ 已发布";
         hideEditor();
         loadPosts();
-      } catch (e) {
-        showMsg("发布失败: " + e.message, "error");
-        status.textContent = "❌ 失败";
-      }
+      } catch (e) { showMsg("发布失败: " + e.message, "error"); status.textContent = "❌ 失败"; }
     }
 
-    async function editPost(slug) { showEditor(slug); }
+    function editPost(slug) { showEditor(slug); }
 
     async function deletePost(slug) {
       if (!confirm("确定删除 " + slug + "？")) return;
