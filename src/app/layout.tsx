@@ -4,8 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: { default: "YuMo | 予墨成书", template: "%s | YuMo" },
-  description: "以笔为舟，以墨为海 · 技术笔记 · 摄影记录 · 个人博客",
+  title: { default: "YuMo", template: "%s | YuMo" },
+  description: "技术笔记 · 摄影记录 · 个人博客",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
