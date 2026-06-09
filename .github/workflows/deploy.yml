@@ -1,15 +1,12 @@
-name: Build & Validate
+name: Auto Deploy
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,9 +16,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - name: Deploy to gh-pages (备用)
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          force_orphan: true
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: 04f61e52bd938c6a273dd5c782055921
+          command: pages deploy out --project-name=lika-site --branch=production
