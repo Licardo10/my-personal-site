@@ -157,8 +157,8 @@
     const api = "https://api.github.com";
 
     // ====== 工具函数 ======
-    function b64Encode(str) { return btoa(unescape(encodeURIComponent(str))); }
-    function b64Decode(str) { return decodeURIComponent(escape(atob(str.replace(/\n/g, "")))); }
+    function b64Encode(str) { const e=new TextEncoder().encode(str); let b=""; for(let i=0;i<e.length;i++) b+=String.fromCharCode(e[i]); return btoa(b); }
+    function b64Decode(str) { const b=atob(str.replace(/\n/g,"")); const u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new TextDecoder().decode(u); }
 
     function showMsg(text, type) {
       const msg = document.getElementById("msg");
@@ -411,3 +411,4 @@
   </script>
 </body>
 </html>
+
