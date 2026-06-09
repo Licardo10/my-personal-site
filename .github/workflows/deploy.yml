@@ -23,4 +23,3 @@ jobs:
           accountId: 04f61e52bd938c6a273dd5c782055921
           projectName: lika-site
           directory: out
-          branch: production
