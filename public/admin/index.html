@@ -84,7 +84,7 @@ function showMsg(text,type){const root=$id("appRoot");const m=$html("div",{class
 
 async function gh(url,method="GET",body=null){
   const res=await fetch(api+url,{method,body:body?JSON.stringify(body):null,headers:{Authorization:"token "+g_token,Accept:"application/vnd.github.v3+json"}})
-  if(!res.ok){const err=await res.text();throw new Error("API: "+res.status+" "+err)}
+  if(!res.ok){const err=await res.text();const tips=res.status===401?" ❗ Token 可能已过期，请重置":"";throw new Error("GitHub API 错误 ["+res.status+"]"+tips)}
   return res.status===204?null:await res.json()
 }
 
@@ -299,8 +299,9 @@ async function publishPost(slug){
     let sha=null
     if(slug){try{const old=await gh("/repos/"+repo+"/contents/content/posts/"+slug);sha=old.sha}catch(e){}}
     await gh("/repos/"+repo+"/contents/content/posts/"+(slug||fn),"PUT",{message:(slug?"更新":"新文章")+": "+t,content:b64Encode(content),branch,sha})
-    showMsg("✅ 已发布","success")
-    backToMain()
+    showMsg("✅ 已写入 GitHub，将在 2-3 分钟后自动部署上线","success")
+    $id("eStatus").innerHTML='<a href="https://github.com/'+repo+'/actions" target="_blank" style="color:#a78bfa;text-decoration:underline">📊 查看部署进度 →</a>'
+    setTimeout(()=>backToMain(),3000)
   }catch(e){showMsg("失败: "+e.message,"error");$id("eStatus").textContent="❌"}
 }
 
@@ -320,7 +321,7 @@ function bindPostsEvents(){
     try{
       const f=await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug)
       await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug,"DELETE",{message:"删除文章: "+b.dataset.slug,sha:f.sha,branch})
-      showMsg("✅ 已删除","success");loadTab("posts")
+      showMsg("✅ 已删除，将在 2-3 分钟后同步到网站","success");loadTab("posts")
     }catch(e){showMsg("失败: "+e.message,"error")}
   })
 }
@@ -501,7 +502,7 @@ async function saveAlbum(editId){
     if(idx>=0)data.albums[idx]=album
   }else{data.albums.push(album)}
   await writeFile("content/gallery.json",JSON.stringify(data,null,2),"更新相册: "+title)
-  showMsg("✅ 已保存","success");backToMain()
+  showMsg("✅ 相册已保存，将在 2-3 分钟后生效","success");backToMain()
 }
 
 function bindAlbumsEvents(){
@@ -512,7 +513,7 @@ function bindAlbumsEvents(){
     const data=JSON.parse(raw)
     data.albums=data.albums.filter(a=>a.id!==b.dataset.id)
     await writeFile("content/gallery.json",JSON.stringify(data,null,2),"删除相册: "+b.dataset.id)
-    showMsg("✅ 已删除","success");loadTab("albums")
+    showMsg("✅ 已删除，将在 2-3 分钟后同步到网站","success");loadTab("albums")
   })
 }
 
@@ -521,3 +522,4 @@ render()
 </script>
 </body>
 </html>
+

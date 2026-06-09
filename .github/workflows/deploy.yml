@@ -17,8 +17,10 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: 04f61e52bd938c6a273dd5c782055921
-          command: pages deploy out --project-name=lika-site --branch=production
+          projectName: lika-site
+          directory: out
+          branch: production

@@ -13,7 +13,7 @@ export default function Footer() {
               className="text-dark-400 hover:text-accent transition-colors" aria-label="GitHub">
               <Github size={20} />
             </a>
-            <a href="mailto:yumo@example.com"
+            <a href="mailto:2224689707@qq.com"
               className="text-dark-400 hover:text-accent transition-colors" aria-label="Email">
               <Mail size={20} />
             </a>

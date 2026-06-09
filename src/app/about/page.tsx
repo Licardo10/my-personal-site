@@ -19,7 +19,7 @@ export default function AboutPage() {
             <div className="flex justify-center gap-3 mt-6">
               <a href="https://github.com/Licardo10" target="_blank" rel="noopener noreferrer"
                 className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 text-dark-300 hover:text-accent transition-all" aria-label="GitHub"><Github size={18} /></a>
-              <a href="mailto:yumo@example.com"
+              <a href="mailto:2224689707@qq.com"
                 className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 text-dark-300 hover:text-accent transition-all" aria-label="Email"><Mail size={18} /></a>
             </div>
           </div>
