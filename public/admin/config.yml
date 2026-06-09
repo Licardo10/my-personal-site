@@ -1,13 +1,13 @@
 # Decap CMS 配置 - 网页端管理内容
-# https://decapcms.org/docs/configuration-options/
+# 使用 GitHub OAuth 直接登录
 
 backend:
   name: github
   repo: Licardo10/my-personal-site
   branch: main
   site_domain: l1ka.me
-  base_url: https://api.netlify.com
-  auth_endpoint: auth
+  auth_type: implicit
+  app_id: Ov23liiIa28Xx8AT7L9X
 
 media_folder: public/images
 public_folder: /images

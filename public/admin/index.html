@@ -1,14 +1,290 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YuMo - 内容管理</title>
+  <title>YuMo - 后台管理</title>
   <style>
-    body { margin: 0; background: #0a0a0f; color: #e4e4e7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0a0a0f; color: #e4e4e7; min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .sub { color: #71717a; font-size: 14px; margin-bottom: 32px; }
+
+    .card {
+      background: #18181b; border: 1px solid #27272a; border-radius: 12px;
+      padding: 24px; margin-bottom: 20px;
+    }
+    label { display: block; font-size: 13px; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #27272a;
+      background: #09090b; color: #e4e4e7; font-size: 14px; margin-bottom: 16px;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #a78bfa; }
+    textarea { min-height: 120px; font-family: monospace; resize: vertical; }
+    .btn {
+      padding: 10px 24px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary { background: #a78bfa; color: #fff; }
+    .btn-primary:hover { background: #8b5cf6; }
+    .btn-secondary { background: #27272a; color: #e4e4e7; }
+    .btn-secondary:hover { background: #3f3f46; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .token-bar {
+      background: #27272a; border-radius: 8px; padding: 12px 16px;
+      display: flex; gap: 10px; align-items: center; margin-bottom: 24px;
+    }
+    .token-bar input { margin: 0; flex: 1; }
+
+    .msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; }
+    .msg.success { display: block; background: #052e16; border: 1px solid #166534; color: #86efac; }
+    .msg.error { display: block; background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; }
+
+    .flex { display: flex; gap: 10px; align-items: center; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .tag { background: #27272a; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    pre { background: #09090b; padding: 16px; border-radius: 8px; font-size: 13px; max-height: 400px; overflow: auto; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
+  <div class="container">
+    <h1>📝 YuMo 后台</h1>
+    <p class="sub">在这里写文章，自动提交到 GitHub</p>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- Token 设置 -->
+    <div class="token-bar">
+      <input type="password" id="tokenInput" placeholder="输入 GitHub Token（repo 权限）" />
+      <button class="btn btn-primary" onclick="saveToken()">保存</button>
+    </div>
+
+    <!-- 文章列表 -->
+    <div id="postList" class="hidden">
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:16px">
+          <h2>已有文章</h2>
+          <button class="btn btn-primary" onclick="showEditor()">+ 新文章</button>
+        </div>
+        <div id="posts"></div>
+      </div>
+    </div>
+
+    <!-- 编辑器 -->
+    <div id="editor" class="hidden">
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;margin-bottom:16px">
+          <h2 id="editorTitle">写新文章</h2>
+          <button class="btn btn-secondary" onclick="hideEditor()">← 返回</button>
+        </div>
+        <label>标题</label>
+        <input id="postTitle" placeholder="文章标题" />
+        <div class="row">
+          <div>
+            <label>发布日期</label>
+            <input type="date" id="postDate" />
+          </div>
+          <div>
+            <label>标签（逗号分隔）</label>
+            <input id="postTags" placeholder="React, 前端" />
+          </div>
+        </div>
+        <label>简介</label>
+        <textarea id="postExcerpt" placeholder="文章简介..." rows="2"></textarea>
+        <label>正文（Markdown）</label>
+        <textarea id="postBody" placeholder="写文章内容，支持 Markdown 格式..." rows="12"></textarea>
+        <div class="flex">
+          <button class="btn btn-primary" onclick="publishPost()">📤 发布文章</button>
+          <span id="publishStatus" style="color:#71717a;font-size:13px"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem("gh_token") || "";
+    let editingSlug = null;
+    const repo = "Licardo10/my-personal-site";
+    const branch = "main";
+    const api = "https://api.github.com";
+
+    function showMsg(text, type) {
+      const msg = document.getElementById("msg");
+      msg.textContent = text;
+      msg.className = `msg ${type}`;
+      setTimeout(() => { msg.style.display = "none"; }, 5000);
+    }
+
+    function saveToken() {
+      const val = document.getElementById("tokenInput").value.trim();
+      if (val) { localStorage.setItem("gh_token", val); token = val; showMsg("Token 已保存", "success"); loadPosts(); }
+    }
+
+    document.getElementById("tokenInput").value = token;
+    if (token) loadPosts();
+
+    async function gh(url, method = "GET", body = null) {
+      const res = await fetch(api + url, {
+        method, body: body ? JSON.stringify(body) : null,
+        headers: { Authorization: "token " + token, Accept: "application/vnd.github.v3+json" }
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`GitHub API: ${res.status} - ${err}`);
+      }
+      return res.status === 204 ? null : await res.json();
+    }
+
+    async function loadPosts() {
+      try {
+        document.getElementById("postList").classList.remove("hidden");
+        const data = await gh("/repos/" + repo + "/contents/content/posts");
+        const container = document.getElementById("posts");
+        if (Array.isArray(data)) {
+          const mdFiles = data.filter(f => f.name.endsWith(".md")).reverse();
+          if (mdFiles.length === 0) {
+            container.innerHTML = '<p style="color:#71717a">还没有文章</p>';
+          } else {
+            container.innerHTML = "";
+            for (const file of mdFiles) {
+              const content = await gh("/repos/" + repo + "/contents/content/posts/" + file.name);
+              const raw = atob(content.content.replace(/\n/g, ""));
+              const titleMatch = raw.match(/title:\s*["\']?([^"\'\n]+)/);
+              const title = titleMatch ? titleMatch[1] : file.name;
+              const div = document.createElement("div");
+              div.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a";
+              div.innerHTML = `<span>${title}</span>
+                <div class="flex">
+                  <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="editPost('${file.name}')">编辑</button>
+                  <button class="btn btn-danger" style="padding:6px 14px;font-size:12px" onclick="deletePost('${file.name}')">删除</button>
+                </div>`;
+              container.appendChild(div);
+            }
+          }
+        } else {
+          container.innerHTML = '<p style="color:#71717a">还没有文章</p>';
+        }
+      } catch (e) {
+        if (e.message.includes("401") || e.message.includes("403")) {
+          showMsg("Token 无效或没有权限，请重新输入", "error");
+        } else {
+          showMsg("加载失败: " + e.message, "error");
+        }
+      }
+    }
+
+    function showEditor(slug) {
+      editingSlug = slug || null;
+      document.getElementById("editor").classList.remove("hidden");
+      document.getElementById("editorTitle").textContent = slug ? "编辑文章" : "写新文章";
+      if (slug) loadPostForEdit(slug);
+    }
+
+    function hideEditor() {
+      document.getElementById("editor").classList.add("hidden");
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
+      document.getElementById("postTags").value = "";
+      document.getElementById("postExcerpt").value = "";
+      document.getElementById("postBody").value = "";
+      editingSlug = null;
+    }
+
+    document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
+
+    async function loadPostForEdit(slug) {
+      try {
+        const file = await gh("/repos/" + repo + "/contents/content/posts/" + slug);
+        const raw = atob(file.content.replace(/\n/g, ""));
+        const parts = raw.split("---");
+        if (parts.length >= 3) {
+          const meta = parts[1];
+          const body = parts.slice(2).join("---").trim();
+          const title = meta.match(/title:\s*["\']?([^"'\n]+)/);
+          const date = meta.match(/date:\s*["\']?([^"'\n]+)/);
+          const tags = meta.match(/tags:\s*\[([^\]]+)\]/);
+          const excerpt = meta.match(/excerpt:\s*["\']?([^"'\n]+)/);
+          if (title) document.getElementById("postTitle").value = title[1].trim();
+          if (date) document.getElementById("postDate").value = date[1].trim();
+          if (tags) document.getElementById("postTags").value = tags[1].split(",").map(t => t.trim().replace(/["']/g, "")).join(", ");
+          if (excerpt) document.getElementById("postExcerpt").value = excerpt[1].trim();
+          document.getElementById("postBody").value = body;
+        }
+        editingSlug = slug;
+        document.getElementById("publishStatus").textContent = "（将覆盖原文件）";
+      } catch (e) {
+        showMsg("加载文章失败: " + e.message, "error");
+      }
+    }
+
+    async function publishPost() {
+      const title = document.getElementById("postTitle").value.trim();
+      const date = document.getElementById("postDate").value;
+      const tagsStr = document.getElementById("postTags").value.trim();
+      const excerpt = document.getElementById("postExcerpt").value.trim();
+      const body = document.getElementById("postBody").value.trim();
+      if (!title || !body) { showMsg("标题和正文不能为空", "error"); return; }
+
+      const tags = tagsStr ? tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean) : ["其他"];
+      const slug = editingSlug || title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-|-$/g, "") + ".md";
+
+      const content = `---
+title: "${title}"
+date: ${date}
+tags: [${tags.map(t => '"' + t + '"').join(", ")}]
+excerpt: "${excerpt}"
+---
+
+${body}
+`;
+
+      const status = document.getElementById("publishStatus");
+      status.textContent = "发布中...";
+
+      try {
+        let sha = null;
+        if (editingSlug) {
+          try {
+            const existing = await gh("/repos/" + repo + "/contents/content/posts/" + editingSlug);
+            sha = existing.sha;
+          } catch (e) { /* 新文件 */ }
+        }
+        await gh("/repos/" + repo + "/contents/content/posts/" + (editingSlug || slug), "PUT", {
+          message: editingSlug ? "更新文章: " + title : "新文章: " + title,
+          content: btoa(unescape(encodeURIComponent(content))),
+          branch, sha
+        });
+        showMsg("✅ 文章已发布！等待自动部署...", "success");
+        status.textContent = "✅ 已发布";
+        hideEditor();
+        loadPosts();
+      } catch (e) {
+        showMsg("发布失败: " + e.message, "error");
+        status.textContent = "❌ 失败";
+      }
+    }
+
+    async function editPost(slug) { showEditor(slug); }
+
+    async function deletePost(slug) {
+      if (!confirm("确定删除 " + slug + "？")) return;
+      try {
+        const file = await gh("/repos/" + repo + "/contents/content/posts/" + slug);
+        await gh("/repos/" + repo + "/contents/content/posts/" + slug, "DELETE", {
+          message: "删除文章: " + slug, sha: file.sha, branch
+        });
+        showMsg("✅ 文章已删除", "success");
+        loadPosts();
+      } catch (e) { showMsg("删除失败: " + e.message, "error"); }
+    }
+  </script>
 </body>
 </html>
