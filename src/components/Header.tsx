@@ -18,7 +18,7 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-dark-900/80 backdrop-blur-lg border-b border-dark-700/50">
       <nav className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold gradient-text hover:opacity-80 transition-opacity">
-          Licardo
+          YuMo
         </Link>
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (

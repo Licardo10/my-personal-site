@@ -8,12 +8,12 @@ export default function Home() {
   return (
     <div className="max-w-5xl mx-auto px-6">
       <section className="min-h-[80vh] flex flex-col justify-center py-20">
-        <p className="text-accent font-mono text-sm mb-4">你好，我是</p>
-        <h1 className="text-5xl md:text-7xl font-bold mb-6">
-          <span className="gradient-text">Licardo</span>
+        <p className="text-accent font-mono text-sm mb-4 tracking-widest">予 墨 成 书</p>
+        <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+          <span className="gradient-text">YuMo</span>
         </h1>
         <p className="text-xl md:text-2xl text-dark-300 mb-4 max-w-2xl">
-          一名热爱技术的开发者
+          以笔为舟，以墨为海
         </p>
         <p className="text-dark-400 text-lg mb-8 max-w-xl leading-relaxed">
           记录技术学习的点滴，分享阅读笔记与心得体会，也用镜头捕捉生活中的美好瞬间。

@@ -9,8 +9,8 @@ export default function AboutPage() {
       <div className="grid md:grid-cols-3 gap-8 mb-16">
         <div className="md:col-span-1">
           <div className="card">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-accent to-accent-dark mx-auto mb-6 flex items-center justify-center text-4xl font-bold text-white">L</div>
-            <h2 className="text-xl font-bold text-white text-center mb-2">Licardo</h2>
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-accent to-accent-dark mx-auto mb-6 flex items-center justify-center text-4xl font-bold text-white">Y</div>
+            <h2 className="text-xl font-bold text-white text-center mb-2">YuMo</h2>
             <p className="text-dark-400 text-sm text-center mb-4">开发者 / 学习者</p>
             <div className="space-y-2 text-sm text-dark-400">
               <p className="flex items-center gap-2"><MapPin size={14} /> China</p>
@@ -19,7 +19,7 @@ export default function AboutPage() {
             <div className="flex justify-center gap-3 mt-6">
               <a href="https://github.com/Licardo10" target="_blank" rel="noopener noreferrer"
                 className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 text-dark-300 hover:text-accent transition-all" aria-label="GitHub"><Github size={18} /></a>
-              <a href="mailto:licardo@example.com"
+              <a href="mailto:yumo@example.com"
                 className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 text-dark-300 hover:text-accent transition-all" aria-label="Email"><Mail size={18} /></a>
             </div>
           </div>
