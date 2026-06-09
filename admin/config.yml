@@ -1,0 +1,40 @@
+# Decap CMS 配置 - 网页端管理内容
+# 使用 GitHub OAuth 直接登录
+
+backend:
+  name: github
+  repo: Licardo10/my-personal-site
+  branch: main
+  site_domain: l1ka.me
+  auth_type: implicit
+  app_id: Ov23liiIa28Xx8AT7L9X
+
+media_folder: public/images
+public_folder: /images
+
+slug:
+  encoding: "ascii"
+  clean_accents: true
+
+editor:
+  preview: false
+
+collections:
+  - name: "blog"
+    label: "博客文章"
+    label_singular: "文章"
+    folder: "content/posts"
+    create: true
+    delete: true
+    path: "{{slug}}"
+    media_folder: "../../public/images"
+    public_folder: "/images"
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    fields:
+      - { label: "标题", name: "title", widget: "string" }
+      - { label: "发布日期", name: "date", widget: "datetime", format: "YYYY-MM-DD" }
+      - { label: "标签", name: "tags", widget: "list", default: ["其他"] }
+      - { label: "简介", name: "excerpt", widget: "text" }
+      - { label: "正文", name: "body", widget: "markdown" }
