@@ -192,7 +192,8 @@ function renderMain(){
     '<div class="tabs" id="tabs">'+
     '<button class="tab active" data-tab="posts">📄 文章</button>'+
     '<button class="tab" data-tab="media">🖼️ 媒体</button>'+
-    '<button class="tab" data-tab="albums">📁 相册</button>'+
+    '<button class="tab" data-tab="albums">📁 相册</button>
+    <button class="tab" data-tab="homepage">🏠 主页</button>'+
     '</div><div id="tabContent"></div>'
   
   root.querySelectorAll(".tab").forEach(t=>t.onclick=function(){
@@ -208,12 +209,12 @@ async function loadTab(name){
   try{
     if(name==="posts")ct.innerHTML=await renderPostsTab()
     else if(name==="media")ct.innerHTML=await renderMediaTab()
-    else if(name==="albums")ct.innerHTML=await renderAlbumsTab()
+    else if(name==="albums")ct.innerHTML=await renderAlbumsTab();else if(name==="homepage")ct.innerHTML=await renderHomepageTab()
   }catch(e){ct.innerHTML="<div class='msg error'>加载失败: "+e.message+"</div>"}
   // Rebind events
   if(name==="posts")bindPostsEvents()
   else if(name==="media")bindMediaEvents()
-  else if(name==="albums")bindAlbumsEvents()
+  else if(name==="albums")bindAlbumsEvents();else if(name==="homepage")bindHomepageEvents()
 }
 
 // ============ POSTS TAB ============
@@ -245,7 +246,7 @@ function showPostEditor(slug=null){
   root.innerHTML="<h1>"+existing+"文章</h1><p class='sub'>Markdown 格式</p><div id='msg'></div>"+
     "<div class='card'>"+
     "<label>标题</label><input id='eTitle' placeholder='文章标题'/>"+
-    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div>"+
+    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div><label style='display:flex;align-items:center;gap:8px;margin-bottom:14px'><input type='checkbox' id='ePinned' style='width:auto;margin:0'/> 置顶文章</label>"+
     "<label>简介</label><textarea id='eExcerpt' rows='2'></textarea>"+
     "<label>正文</label>"+
     "<div class='flex' style='margin-bottom:8px'>"+
@@ -291,9 +292,9 @@ async function publishPost(slug){
   const t=$id("eTitle").value.trim(),d=$id("eDate").value,ts=$id("eTags").value.trim()
   const ex=$id("eExcerpt").value.trim(),b=$id("eBody").value.trim()
   if(!t||!b){showMsg("标题和正文不能为空","error");return}
-  const tags=ts?ts.split(/[,，]/).map(x=>x.trim()).filter(Boolean):["其他"]
+  const tags=ts?ts.split(/[,，]/).map(x=>x.trim()).filter(Boolean):["其他"];if(slug){try{const old=await gh("/repos/"+repo+"/contents/content/posts/"+slug);const raw=b64Decode(old.content);const pm=raw.match(/pinned:\s*(\w+)/);$id("ePinned").checked=pm&&pm[1]==="true"}}catch(e){}
   const fn=slug||t.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g,"-").replace(/^-|-$/g,"")+".md"
-  const content="---\ntitle: \""+t+"\"\ndate: "+d+"\ntags: ["+tags.map(x=>'"'+x+'"').join(", ")+"]\nexcerpt: \""+ex+"\"\n---\n\n"+b+"\n"
+  const content="---\ntitle: \""+t+"\"\ndate: "+d+"\ntags: ["+tags.map(x=>'"'+x+'"').join(", ")+"]\npinned: "+($id("ePinned").checked?"true":"false")+"\nexcerpt: \""+ex+"\"\n---\n\n"+b+"\n"
   $id("eStatus").textContent="发布中..."
   try{
     let sha=null
@@ -517,9 +518,33 @@ function bindAlbumsEvents(){
   })
 }
 
+// ============ HOMEPAGE TAB ============
+async function renderHomepageTab(){
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>主页设置</h2></div>"
+  try{
+    const raw=await readFile("content/homepage.json")
+    const data=JSON.parse(raw)
+    html+="<div class='card'>"+
+      "<label>主标题</label><input id='hHeroTitle' value='"+data.heroTitle+"'/>"+
+      "<label>副标题</label><textarea id='hHeroSubtitle' rows='3'>"+data.heroSubtitle+"</textarea>"+
+      "<button class='btn btn-primary' onclick='saveHomepage()'>💾 保存</button></div>"
+  }catch(e){html+="<p class='msg error'>加载失败: "+e.message+"</p>"}
+  return html
+}
+
+async function saveHomepage(){
+  const data={heroTitle:$id("hHeroTitle").value.trim(),heroSubtitle:$id("hHeroSubtitle").value.trim()}
+  await writeFile("content/homepage.json",JSON.stringify(data,null,2),"更新主页设置")
+  showMsg("✅ 主页已更新，2-3 分钟后生效","success")
+}
+
+function bindHomepageEvents(){}
+
 // ============ INIT ============
 render()
 </script>
 </body>
 </html>
+
+
 

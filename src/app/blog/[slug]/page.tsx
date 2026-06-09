@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
-import { Calendar, Tag, ArrowLeft } from "lucide-react";
+import { Calendar, Tag, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import GiscusComments from "@/components/GiscusComments";
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -23,6 +24,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{post.title}</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-dark-500">
           <span className="flex items-center gap-1.5"><Calendar size={14} />{post.date}</span>
+          <span className="flex items-center gap-1.5"><Clock size={14} />阅读约 {post.readingTime} 分钟</span>
           {post.tags.map((tag) => (
             <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-dark-700 rounded-full text-dark-400"><Tag size={12} />{tag}</span>
           ))}
@@ -31,6 +33,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       <div className="prose prose-invert max-w-none prose-headings:text-white prose-a:text-accent prose-a:no-underline hover:prose-a:text-accent-light prose-code:text-accent-light prose-code:bg-dark-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-700 prose-blockquote:border-accent prose-blockquote:text-dark-300 prose-strong:text-white prose-img:rounded-lg prose-hr:border-dark-700">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
       </div>
+      <GiscusComments />
     </article>
   );
 }
