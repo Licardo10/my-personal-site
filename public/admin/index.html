@@ -3,412 +3,521 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lika - 后台管理</title>
+  <title>Lika 后台</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0a0a0f; color: #e4e4e7; min-height: 100vh;
-    }
-    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-    h1 { font-size: 28px; margin-bottom: 8px; }
-    .sub { color: #71717a; font-size: 14px; margin-bottom: 32px; }
-
-    .card {
-      background: #18181b; border: 1px solid #27272a; border-radius: 12px;
-      padding: 24px; margin-bottom: 20px;
-    }
-    label { display: block; font-size: 13px; font-weight: 600; color: #a1a1aa; margin-bottom: 6px; }
-    input, textarea, select {
-      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #27272a;
-      background: #09090b; color: #e4e4e7; font-size: 14px; margin-bottom: 16px;
-    }
-    input:focus, textarea:focus { outline: none; border-color: #a78bfa; }
-    textarea { min-height: 120px; font-family: monospace; resize: vertical; }
-    .btn {
-      padding: 10px 24px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn-primary { background: #a78bfa; color: #fff; }
-    .btn-primary:hover { background: #8b5cf6; }
-    .btn-secondary { background: #27272a; color: #e4e4e7; }
-    .btn-secondary:hover { background: #3f3f46; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #dc2626; }
-    .btn-success { background: #22c55e; color: #fff; }
-    .btn-success:hover { background: #16a34a; }
-
-    .token-bar {
-      background: #27272a; border-radius: 8px; padding: 12px 16px;
-      display: flex; gap: 10px; align-items: center; margin-bottom: 24px;
-    }
-    .token-bar input { margin: 0; flex: 1; }
-
-    .msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; }
-    .msg.success { display: block; background: #052e16; border: 1px solid #166534; color: #86efac; }
-    .msg.error { display: block; background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; }
-
-    .flex { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .hidden { display: none; }
-
-    .upload-area {
-      border: 2px dashed #27272a; border-radius: 8px; padding: 20px;
-      text-align: center; margin-bottom: 16px; cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .upload-area:hover { border-color: #a78bfa; }
-    .upload-area.dragover { border-color: #a78bfa; background: #1a1a2e; }
-    .upload-area p { color: #71717a; font-size: 13px; margin-top: 8px; }
-    .image-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .image-item {
-      position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden;
-      border: 1px solid #27272a; cursor: pointer;
-    }
-    .image-item img { width: 100%; height: 100%; object-fit: cover; }
-    .image-item:hover { border-color: #a78bfa; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0a0a0f;color:#e4e4e7;min-height:100vh}
+    .container{max-width:900px;margin:0 auto;padding:40px 20px}
+    h1{font-size:28px;margin-bottom:4px}
+    h2{font-size:18px}
+    .sub{color:#71717a;font-size:14px;margin-bottom:24px}
+    .card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px;margin-bottom:20px}
+    label{display:block;font-size:13px;font-weight:600;color:#a1a1aa;margin-bottom:6px}
+    input,textarea,select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #27272a;background:#09090b;color:#e4e4e7;font-size:14px;margin-bottom:14px}
+    input:focus,textarea:focus{outline:none;border-color:#a78bfa}
+    textarea{min-height:100px;font-family:monospace;resize:vertical}
+    .btn{padding:8px 20px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+    .btn-primary{background:#a78bfa;color:#fff}
+    .btn-primary:hover{background:#8b5cf6}
+    .btn-secondary{background:#27272a;color:#e4e4e7}
+    .btn-secondary:hover{background:#3f3f46}
+    .btn-danger{background:#ef4444;color:#fff}
+    .btn-danger:hover{background:#dc2626}
+    .btn-success{background:#22c55e;color:#fff}
+    .btn-success:hover{background:#16a34a}
+    .btn-sm{padding:5px 12px;font-size:12px}
+    .msg{padding:12px 16px;border-radius:8px;margin-bottom:16px;display:none}
+    .msg.success{display:block;background:#052e16;border:1px solid #166534;color:#86efac}
+    .msg.error{display:block;background:#450a0a;border:1px solid #991b1b;color:#fca5a5}
+    .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .hidden{display:none}
+    .tabs{display:flex;gap:4px;background:#18181b;border-radius:10px;padding:4px;margin-bottom:20px}
+    .tab{padding:8px 16px;border-radius:8px;border:none;background:transparent;color:#71717a;font-size:13px;font-weight:600;cursor:pointer}
+    .tab.active{background:#27272a;color:#e4e4e7}
+    .upload-area{border:2px dashed #27272a;border-radius:8px;padding:24px;text-align:center;cursor:pointer;margin-bottom:14px;transition:border-color .2s}
+    .upload-area:hover,.upload-area.dragover{border-color:#a78bfa;background:#1a1a2e}
+    .upload-area p{color:#71717a;font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+    .grid-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #27272a;cursor:pointer}
+    .grid-item img,.grid-item video{width:100%;height:100%;object-fit:cover}
+    .grid-item:hover{border-color:#a78bfa}
+    .grid-item .name{position:absolute;bottom:0;left:0;right:0;padding:4px 8px;background:rgba(0,0,0,.7);font-size:11px;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .grid-item .badge{position:absolute;top:4px;right:4px;padding:2px 6px;border-radius:4px;font-size:10px;background:#a78bfa;color:#fff}
+    .grid-item .del-btn{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,.8);color:#fff;border:none;cursor:pointer;font-size:12px;display:none;align-items:center;justify-content:center}
+    .grid-item:hover .del-btn{display:flex}
+    .album-item{padding:14px;border:1px solid #27272a;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .album-info h3{font-size:15px;margin-bottom:4px}
+    .album-info p{color:#71717a;font-size:12px}
+    .inline-row{display:flex;gap:10px;margin-bottom:14px}
+    .inline-row input{flex:1;margin-bottom:0}
+    .login-card{max-width:400px;margin:60px auto}
+    .login-card h1{text-align:center;margin-bottom:24px}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📝 Lika 后台</h1>
-    <p class="sub">写文章、传图片、管理内容</p>
+<div class="container" id="appRoot"></div>
 
-    <div id="msg" class="msg"></div>
+<script>
+// ============ CONSTANTS ============
+const repo="Licardo10/my-personal-site", branch="main", api="https://api.github.com";
+let g_token="", g_lock="" 
 
-    <!-- Token -->
-    <div class="token-bar">
-      <input type="password" id="tokenInput" placeholder="输入 GitHub Token（repo 权限）" />
-      <button class="btn btn-primary" onclick="saveToken()">保存</button>
-    </div>
+// ============ HELPERS ============
+function $id(id){return document.getElementById(id)}
+function $html(tag,attrs={},...children){
+  const el=document.createElement(tag)
+  for(const[k,v]of Object.entries(attrs)){
+    if(k==="style"&&typeof v==="object")Object.assign(el.style,v)
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v)
+    else if(k==="className")el.className=v
+    else el.setAttribute(k,v)
+  }
+  children.forEach(c=>{if(typeof c==="string")el.appendChild(document.createTextNode(c));else if(c)el.appendChild(c)})
+  return el
+}
 
-    <!-- 主界面 -->
-    <div id="mainUI" class="hidden">
-      <!-- 图片管理 -->
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:12px">
-          <h2>🖼️ 图片管理</h2>
-          <label class="btn btn-success" style="font-size:13px;cursor:pointer">
-            + 上传图片
-            <input type="file" id="imageInput" accept="image/*" multiple style="display:none" onchange="uploadImages(event)" />
-          </label>
-        </div>
-        <div class="upload-area" id="dropZone" onclick="document.getElementById('imageInput').click()">
-          <p>拖拽图片到此处 或 点击选择图片</p>
-          <p style="font-size:12px;color:#52525b;">支持 PNG、JPG、GIF、WebP，建议压缩后上传</p>
-        </div>
-        <div id="imageList" class="image-list"></div>
-      </div>
+function b64Encode(s){const e=new TextEncoder().encode(s);let b="";for(let i=0;i<e.length;i++)b+=String.fromCharCode(e[i]);return btoa(b)}
+function b64Decode(s){const b=atob(s.replace(/\n/g,""));const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder().decode(u)}
 
-      <!-- 文章管理 -->
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:16px">
-          <h2>📄 文章管理</h2>
-          <button class="btn btn-primary" onclick="showEditor()">+ 新文章</button>
-        </div>
-        <div id="posts"></div>
-      </div>
-    </div>
+function showMsg(text,type){const root=$id("appRoot");const m=$html("div",{className:"msg "+type},text);root.prepend(m);setTimeout(()=>m.remove(),4000)}
 
-    <!-- 编辑器 -->
-    <div id="editor" class="hidden">
-      <div class="card">
-        <div class="flex" style="justify-content:space-between;margin-bottom:16px">
-          <h2 id="editorTitle">写新文章</h2>
-          <button class="btn btn-secondary" onclick="hideEditor()">← 返回</button>
-        </div>
-        <label>标题</label>
-        <input id="postTitle" placeholder="文章标题" />
-        <div class="row">
-          <div>
-            <label>发布日期</label>
-            <input type="date" id="postDate" />
-          </div>
-          <div>
-            <label>标签（逗号分隔）</label>
-            <input id="postTags" placeholder="React, 前端" />
-          </div>
-        </div>
-        <label>简介</label>
-        <textarea id="postExcerpt" placeholder="文章简介..." rows="2"></textarea>
-        <label>正文（Markdown）</label>
-        <div class="flex" style="margin-bottom:8px">
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('**','**')"><b>粗体</b></button>
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('*','*')"><i>斜体</i></button>
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('## ','')">标题</button>
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('```\n','\n```')">代码块</button>
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertTag('- ','')">列表</button>
-          <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="insertImage()">🖼️ 图片</button>
-        </div>
-        <textarea id="postBody" placeholder="写文章内容，支持 Markdown 格式..." rows="16"></textarea>
-        <div class="flex">
-          <button class="btn btn-primary" onclick="publishPost()">📤 发布文章</button>
-          <span id="publishStatus" style="color:#71717a;font-size:13px"></span>
-        </div>
-      </div>
-    </div>
-  </div>
+async function gh(url,method="GET",body=null){
+  const res=await fetch(api+url,{method,body:body?JSON.stringify(body):null,headers:{Authorization:"token "+g_token,Accept:"application/vnd.github.v3+json"}})
+  if(!res.ok){const err=await res.text();throw new Error("API: "+res.status+" "+err)}
+  return res.status===204?null:await res.json()
+}
 
-  <script>
-    let token = localStorage.getItem("gh_token") || "";
-    let editingSlug = null;
-    const repo = "Licardo10/my-personal-site";
-    const branch = "main";
-    const api = "https://api.github.com";
+async function readFile(path){
+  const data=await gh("/repos/"+repo+"/contents/"+path)
+  return b64Decode(data.content)
+}
 
-    // ====== 工具函数 ======
-    function b64Encode(str) { const e=new TextEncoder().encode(str); let b=""; for(let i=0;i<e.length;i++) b+=String.fromCharCode(e[i]); return btoa(b); }
-    function b64Decode(str) { const b=atob(str.replace(/\n/g,"")); const u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new TextDecoder().decode(u); }
+async function writeFile(path,content,msg){
+  try{var existing=await gh("/repos/"+repo+"/contents/"+path);var sha=existing.sha}catch(e){}
+  await gh("/repos/"+repo+"/contents/"+path,"PUT",{message:msg,content:b64Encode(content),branch,sha})
+}
 
-    function showMsg(text, type) {
-      const msg = document.getElementById("msg");
-      msg.textContent = text;
-      msg.className = "msg " + type;
-      setTimeout(() => { msg.style.display = "none"; }, 5000);
-    }
+async function listDir(path){
+  try{return await gh("/repos/"+repo+"/contents/"+path)}catch(e){return[]}
+}
 
-    function saveToken() {
-      const val = document.getElementById("tokenInput").value.trim();
-      if (val) { localStorage.setItem("gh_token", val); token = val; showMsg("Token 已保存", "success"); init(); }
-    }
+// ============ ENCRYPTION ============
+async function deriveKey(password,salt){
+  const enc=new TextEncoder()
+  const keyMaterial=await crypto.subtle.importKey("raw",enc.encode(password),"PBKDF2",false,["deriveKey"])
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:enc.encode(salt),iterations:100000,hash:"SHA-256"},keyMaterial,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])
+}
 
-    document.getElementById("tokenInput").value = token;
-    if (token) init();
+async function encrypt(plain,key){
+  const iv=crypto.getRandomValues(new Uint8Array(12))
+  const enc=new TextEncoder()
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,enc.encode(plain))
+  return JSON.stringify({iv:Array.from(iv),ct:Array.from(new Uint8Array(ct))})
+}
 
-    async function gh(url, method = "GET", body = null) {
-      const res = await fetch(api + url, {
-        method, body: body ? JSON.stringify(body) : null,
-        headers: { Authorization: "token " + token, Accept: "application/vnd.github.v3+json" }
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error("GitHub API: " + res.status + " - " + err);
+async function decrypt(cipherJson,key){
+  const{iv,ct}=JSON.parse(cipherJson)
+  const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(iv)},key,new Uint8Array(ct))
+  return new TextDecoder().decode(dec)
+}
+
+// ============ RENDER ============
+async function render(){
+  const root=$id("appRoot")
+  root.innerHTML=""
+  
+  // Check login state
+  const saved=localStorage.getItem("lika_lock")
+  if(saved){
+    try{
+      g_lock=JSON.parse(saved)
+      root.appendChild(await buildLoginUI())
+      return
+    }catch(e){}
+  }
+  
+  // No lock -> ask for password + token
+  root.appendChild(buildSetupUI())
+}
+
+function buildSetupUI(){
+  const card=$html("div",{className:"card login-card"},
+    $html("h1",{},"🔐 首次设置"),
+    $html("label",{},"设置管理密码"),$html("input",{id:"setupPwd",type:"password",placeholder:"输入密码（至少6位）"}),
+    $html("label",{},"GitHub Token"),$html("input",{id:"setupToken",type:"password",placeholder:"ghp_xxxxxxxxxxxx"}),
+    $html("button",{className:"btn btn-primary",onclick:async()=>{
+      const pwd=$id("setupPwd").value.trim()
+      const token=$id("setupToken").value.trim()
+      if(!pwd||pwd.length<6){showMsg("密码至少6位","error");return}
+      if(!token.startsWith("ghp_")&&!token.startsWith("github_pat_")){showMsg("Token格式不正确","error");return}
+      const key=await deriveKey(pwd,"lika-cms-salt-v1")
+      const salt=crypto.getRandomValues(new Uint8Array(16))
+      const encToken=await encrypt(token,key)
+      const lock={encToken,salt:Array.from(salt),hash:await crypto.subtle.digest("SHA-256",new TextEncoder().encode(pwd)).then(h=>Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,"0")).join(""))}
+      localStorage.setItem("lika_lock",JSON.stringify(lock))
+      g_lock=lock
+      g_token=token
+      showMsg("设置成功！","success")
+      setTimeout(()=>renderMain(),300)
+    }},"保存并进入")
+  )
+  return card
+}
+
+async function buildLoginUI(){
+  const card=$html("div",{className:"card login-card"},
+    $html("h1",{},"📝 Lika"),
+    $html("p",{style:{textAlign:"center",color:"#71717a",marginBottom:"20px",fontSize:"14px"}},"输入管理密码"),
+    $html("input",{id:"loginPwd",type:"password",placeholder:"管理密码"}),
+    $html("button",{className:"btn btn-primary",onclick:async()=>{
+      const pwd=$id("loginPwd").value.trim()
+      const hash=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(pwd)))).map(b=>b.toString(16).padStart(2,"0")).join("")
+      if(hash!==g_lock.hash){showMsg("密码错误","error");return}
+      const key=await deriveKey(pwd,"lika-cms-salt-v1")
+      g_token=await decrypt(g_lock.encToken,key)
+      showMsg("登录成功","success")
+      setTimeout(()=>renderMain(),300)
+    }},"登录"),
+    $html("button",{className:"btn btn-secondary",style:{marginTop:"20px"},onclick:()=>{localStorage.removeItem("lika_lock");render()}},"重置设置")
+  )
+  return card
+}
+
+// ============ MAIN UI ============
+function renderMain(){
+  const root=$id("appRoot")
+  root.innerHTML=""
+  root.innerHTML="<h1>📝 Lika</h1><p class='sub'>写文章 · 传图片/视频 · 管理相册</p><div id='msg'></div>"+
+    '<div class="tabs" id="tabs">'+
+    '<button class="tab active" data-tab="posts">📄 文章</button>'+
+    '<button class="tab" data-tab="media">🖼️ 媒体</button>'+
+    '<button class="tab" data-tab="albums">📁 相册</button>'+
+    '</div><div id="tabContent"></div>'
+  
+  root.querySelectorAll(".tab").forEach(t=>t.onclick=function(){
+    root.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
+    this.classList.add("active")
+    loadTab(this.dataset.tab)
+  })
+  loadTab("posts")
+}
+
+async function loadTab(name){
+  const ct=$id("tabContent");ct.innerHTML="<p style='color:#71717a'>加载中...</p>"
+  try{
+    if(name==="posts")ct.innerHTML=await renderPostsTab()
+    else if(name==="media")ct.innerHTML=await renderMediaTab()
+    else if(name==="albums")ct.innerHTML=await renderAlbumsTab()
+  }catch(e){ct.innerHTML="<div class='msg error'>加载失败: "+e.message+"</div>"}
+  // Rebind events
+  if(name==="posts")bindPostsEvents()
+  else if(name==="media")bindMediaEvents()
+  else if(name==="albums")bindAlbumsEvents()
+}
+
+// ============ POSTS TAB ============
+async function renderPostsTab(){
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>文章列表</h2><button class='btn btn-primary' onclick='showPostEditor()'>+ 新文章</button></div>"
+  try{
+    const data=await gh("/repos/"+repo+"/contents/content/posts")
+    if(Array.isArray(data)&&data.length){
+      const mds=data.filter(f=>f.name.endsWith(".md")).reverse()
+      for(const f of mds){
+        try{
+          const c=await gh("/repos/"+repo+"/contents/content/posts/"+f.name)
+          const raw=b64Decode(c.content)
+          const m=raw.match(/title:\s*"?([^"\n]+)/)
+          html+="<div class='album-item'><div class='album-info'><h3>"+(m?m[1]:f.name)+"</h3><p>"+f.name+"</p></div>"+
+            "<div class='flex'><button class='btn btn-secondary btn-sm' data-action='edit-post' data-slug='"+f.name+"'>编辑</button>"+
+            "<button class='btn btn-danger btn-sm' data-action='del-post' data-slug='"+f.name+"'>删除</button></div></div>"
+        }catch(e){}
       }
-      return res.status === 204 ? null : await res.json();
-    }
+    }else{html+="<p style='color:#71717a'>还没有文章</p>"}
+  }catch(e){html+="<p style='color:#71717a'>还没有文章</p>"}
+  return html
+}
 
-    // ====== 初始化 ======
-    async function init() {
-      document.getElementById("mainUI").classList.remove("hidden");
-      loadPosts();
-      loadImages();
-      setupDragDrop();
-    }
+// Post editor (separate view)
+function showPostEditor(slug=null){
+  const root=$id("appRoot")
+  const existing=slug ? "编辑" : "新"
+  root.innerHTML="<h1>"+existing+"文章</h1><p class='sub'>Markdown 格式</p><div id='msg'></div>"+
+    "<div class='card'>"+
+    "<label>标题</label><input id='eTitle' placeholder='文章标题'/>"+
+    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div>"+
+    "<label>简介</label><textarea id='eExcerpt' rows='2'></textarea>"+
+    "<label>正文</label>"+
+    "<div class='flex' style='margin-bottom:8px'>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"**\",\"**\")'><b>B</b></button>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"*\",\"*\")'><i>I</i></button>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"## \",\"\")'>H</button>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"```\\n\",\"\\n```\")'>代码</button>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"- \",\"\")'>列表</button>"+
+    "<button class='btn btn-secondary btn-sm' onclick='insTag(\"![描述](/images/文件名.jpg)\",\"\")'>🖼️</button>"+
+    "</div>"+
+    "<textarea id='eBody' placeholder='Markdown 内容...' rows='18'></textarea>"+
+    "<div class='flex' style='margin-top:12px'>"+
+    "<button class='btn btn-primary' id='publishBtn'>📤 发布</button>"+
+    "<button class='btn btn-secondary' onclick='backToMain()'>← 返回</button>"+
+    "<span id='eStatus' style='color:#71717a;font-size:13px'></span></div></div>"
+  
+  $id("eDate").value=new Date().toISOString().split("T")[0]
+  $id("publishBtn").onclick=()=>publishPost(slug)
+  
+  if(slug) loadPostForEdit(slug)
+}
 
-    // ====== 拖拽上传 ======
-    function setupDragDrop() {
-      const dz = document.getElementById("dropZone");
-      dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("dragover"); });
-      dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
-      dz.addEventListener("drop", e => {
-        e.preventDefault();
-        dz.classList.remove("dragover");
-        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
-      });
+async function loadPostForEdit(slug){
+  try{
+    const f=await gh("/repos/"+repo+"/contents/content/posts/"+slug)
+    const raw=b64Decode(f.content)
+    const parts=raw.split("---")
+    if(parts.length>=3){
+      const meta=parts[1],body=parts.slice(2).join("---").trim()
+      const t=meta.match(/title:\s*"?([^"\n]+)/),d=meta.match(/date:\s*"?([^"\n]+)/)
+      const tg=meta.match(/tags:\s*\[([^\]]+)\]/),ex=meta.match(/excerpt:\s*"?([^"\n]+)/)
+      if(t)$id("eTitle").value=t[1].trim()
+      if(d)$id("eDate").value=d[1].trim()
+      if(tg)$id("eTags").value=tg[1].split(",").map(x=>x.trim().replace(/["']/g,"")).join(", ")
+      if(ex)$id("eExcerpt").value=ex[1].trim()
+      $id("eBody").value=body
     }
+    $id("eStatus").textContent="（将覆盖原文件）"
+  }catch(e){showMsg("加载失败: "+e.message,"error")}
+}
 
-    async function uploadImages(e) {
-      if (e.target.files.length) handleFiles(e.target.files);
-      e.target.value = "";
-    }
+async function publishPost(slug){
+  const t=$id("eTitle").value.trim(),d=$id("eDate").value,ts=$id("eTags").value.trim()
+  const ex=$id("eExcerpt").value.trim(),b=$id("eBody").value.trim()
+  if(!t||!b){showMsg("标题和正文不能为空","error");return}
+  const tags=ts?ts.split(/[,，]/).map(x=>x.trim()).filter(Boolean):["其他"]
+  const fn=slug||t.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g,"-").replace(/^-|-$/g,"")+".md"
+  const content="---\ntitle: \""+t+"\"\ndate: "+d+"\ntags: ["+tags.map(x=>'"'+x+'"').join(", ")+"]\nexcerpt: \""+ex+"\"\n---\n\n"+b+"\n"
+  $id("eStatus").textContent="发布中..."
+  try{
+    let sha=null
+    if(slug){try{const old=await gh("/repos/"+repo+"/contents/content/posts/"+slug);sha=old.sha}catch(e){}}
+    await gh("/repos/"+repo+"/contents/content/posts/"+(slug||fn),"PUT",{message:(slug?"更新":"新文章")+": "+t,content:b64Encode(content),branch,sha})
+    showMsg("✅ 已发布","success")
+    backToMain()
+  }catch(e){showMsg("失败: "+e.message,"error");$id("eStatus").textContent="❌"}
+}
 
-    async function handleFiles(files) {
-      for (const file of files) {
-        if (!file.type.startsWith("image/")) continue;
-        const reader = new FileReader();
-        reader.onload = async function (ev) {
-          const base64 = ev.target.result.split(",")[1];
-          const name = Date.now() + "-" + file.name.replace(/[^a-zA-Z0-9._-]/g, "");
-          try {
-            await gh("/repos/" + repo + "/contents/public/images/" + name, "PUT", {
-              message: "上传图片: " + name,
-              content: base64, branch
-            });
-            showMsg("✅ 已上传: " + name, "success");
-            loadImages();
-          } catch (err) { showMsg("上传失败: " + name + " - " + err.message, "error"); }
-        };
-        reader.readAsDataURL(file);
+function insTag(before,after){
+  const ta=$id("eBody"),start=ta.selectionStart,end=ta.selectionEnd
+  ta.value=ta.value.slice(0,start)+before+ta.value.slice(start,end)+after+ta.value.slice(end)
+  ta.selectionStart=ta.selectionEnd=start+before.length
+  ta.focus()
+}
+
+function backToMain(){renderMain()}
+
+function bindPostsEvents(){
+  document.querySelectorAll("[data-action='edit-post']").forEach(b=>b.onclick=()=>showPostEditor(b.dataset.slug))
+  document.querySelectorAll("[data-action='del-post']").forEach(b=>b.onclick=async ()=>{
+    if(!confirm("删除 "+b.dataset.slug+"？"))return
+    try{
+      const f=await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug)
+      await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug,"DELETE",{message:"删除文章: "+b.dataset.slug,sha:f.sha,branch})
+      showMsg("✅ 已删除","success");loadTab("posts")
+    }catch(e){showMsg("失败: "+e.message,"error")}
+  })
+}
+
+// ============ MEDIA TAB ============
+async function renderMediaTab(){
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>媒体文件</h2>"+
+    "<div class='flex'>"+
+    "<button class='btn btn-success btn-sm' onclick=\"document.getElementById('imgUpload').click()\">📷 上传图片</button>"+
+    "<button class='btn btn-success btn-sm' onclick=\"document.getElementById('vidUpload').click()\">🎬 上传视频</button>"+
+    "<input type='file' id='imgUpload' accept='image/*' multiple style='display:none' onchange='uploadMedia(event,\"images\")'>"+
+    "<input type='file' id='vidUpload' accept='video/*' multiple style='display:none' onchange='uploadMedia(event,\"videos\")'>"+
+    "</div></div>"+
+    "<div class='upload-area' id='mediaDrop' onclick=\"document.getElementById('imgUpload').click()\"><p>📁 拖拽图片/视频到此处</p><p style='font-size:12px;color:#52525b'>图片自动保存到 images，视频到 videos</p></div>"
+
+  try{
+    const imgs=await listDir("public/images")
+    const vids=await listDir("public/videos")
+    
+    const imgFiles=(Array.isArray(imgs)?imgs:[]).filter(f=>/\.(png|jpe?g|gif|webp|svg)$/i.test(f.name))
+    const vidFiles=(Array.isArray(vids)?vids:[]).filter(f=>/\.(mp4|webm|mov)$/i.test(f.name))
+    
+    if(imgFiles.length){
+      html+="<h3 style='margin:16px 0 10px'>🖼️ 图片</h3><div class='grid'>"
+      for(const f of imgFiles.slice(0,30)){
+        html+="<div class='grid-item' title='点击复制 /images/"+f.name+"'>"+
+          "<img src='https://raw.githubusercontent.com/"+repo+"/main/public/images/"+f.name+"' loading='lazy'/>"+
+          "<div class='name'>"+f.name+"</div>"+
+          "<button class='del-btn' data-del='/images/"+f.name+"'>×</button></div>"
       }
+      html+="</div>"
     }
-
-    // ====== 加载图片 ======
-    async function loadImages() {
-      try {
-        const data = await gh("/repos/" + repo + "/contents/public/images");
-        const container = document.getElementById("imageList");
-        if (Array.isArray(data)) {
-          const imgs = data.filter(f => /\.(png|jpe?g|gif|webp|svg)$/i.test(f.name));
-          if (imgs.length === 0) { container.innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>'; return; }
-          container.innerHTML = "";
-          for (const img of imgs) {
-            const div = document.createElement("div");
-            div.className = "image-item";
-            div.title = "点击复制: /images/" + img.name;
-            div.onclick = function () {
-              navigator.clipboard.writeText("/images/" + img.name).then(() => {
-                showMsg("已复制: /images/" + img.name, "success");
-              });
-            };
-            div.innerHTML = '<img src="https://raw.githubusercontent.com/' + repo + '/main/public/images/' + img.name + '" alt="' + img.name + '" loading="lazy" />';
-            container.appendChild(div);
-          }
-        } else {
-          container.innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>';
-        }
-      } catch (e) { /* images dir may not exist */ document.getElementById("imageList").innerHTML = '<p style="color:#71717a;font-size:13px">还没有图片</p>'; }
-    }
-
-    // ====== 文章 ======
-    async function loadPosts() {
-      try {
-        const data = await gh("/repos/" + repo + "/contents/content/posts");
-        const container = document.getElementById("posts");
-        if (Array.isArray(data)) {
-          const mdFiles = data.filter(f => f.name.endsWith(".md")).reverse();
-          if (mdFiles.length === 0) { container.innerHTML = '<p style="color:#71717a">还没有文章</p>'; return; }
-          container.innerHTML = "";
-          for (const file of mdFiles) {
-            const content = await gh("/repos/" + repo + "/contents/content/posts/" + file.name);
-            const raw = b64Decode(content.content);
-            const m = raw.match(/title:\s*"?([^"\n]+)/);
-            const title = m ? m[1].trim() : file.name;
-            const div = document.createElement("div");
-            div.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #27272a";
-            div.innerHTML = '<span>' + title + '</span>' +
-              '<div class="flex">' +
-              '<button class="btn btn-secondary" style="padding:6px 14px;font-size:12px" onclick="editPost(\'' + file.name + '\')">编辑</button>' +
-              '<button class="btn btn-danger" style="padding:6px 14px;font-size:12px" onclick="deletePost(\'' + file.name + '\')">删除</button>' +
-              '</div>';
-            container.appendChild(div);
-          }
-        } else {
-          container.innerHTML = '<p style="color:#71717a">还没有文章</p>';
-        }
-      } catch (e) {
-        if (e.message.includes("401") || e.message.includes("403")) showMsg("Token 无效或没有权限", "error");
-        else showMsg("加载失败: " + e.message, "error");
+    if(vidFiles.length){
+      html+="<h3 style='margin:16px 0 10px'>🎬 视频</h3><div class='grid'>"
+      for(const f of vidFiles.slice(0,30)){
+        html+="<div class='grid-item' title='点击复制 /videos/"+f.name+"'>"+
+          "<video src='https://raw.githubusercontent.com/"+repo+"/main/public/videos/"+f.name+"' preload='metadata'></video>"+
+          "<div class='name'>"+f.name+"</div>"+
+          "<button class='del-btn' data-del='/videos/"+f.name+"'>×</button></div>"
       }
+      html+="</div>"
     }
+    if(!imgFiles.length&&!vidFiles.length)html+="<p style='color:#71717a;margin-top:16px'>还没有文件</p>"
+  }catch(e){html+="<p style='color:#71717a;margin-top:16px'>加载失败</p>"}
+  return html
+}
 
-    function showEditor(slug) {
-      editingSlug = slug || null;
-      document.getElementById("editor").classList.remove("hidden");
-      document.getElementById("mainUI").classList.add("hidden");
-      document.getElementById("editorTitle").textContent = slug ? "编辑文章" : "写新文章";
-      if (slug) loadPostForEdit(slug);
+async function uploadMedia(e,folder){
+  if(!e.target.files.length)return
+  for(const file of e.target.files){
+    const r=new FileReader()
+    r.onload=async function(ev){
+      const base64=ev.target.result.split(",")[1]
+      const name=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"")
+      try{
+        await gh("/repos/"+repo+"/contents/public/"+folder+"/"+name,"PUT",{message:"上传: "+name,content:base64,branch})
+        showMsg("✅ "+name,"success");loadTab("media")
+      }catch(err){showMsg("上传失败: "+err.message,"error")}
     }
+    r.readAsDataURL(file)
+  }
+  e.target.value=""
+}
 
-    function hideEditor() {
-      document.getElementById("editor").classList.add("hidden");
-      document.getElementById("mainUI").classList.remove("hidden");
-      document.getElementById("postTitle").value = "";
-      document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
-      document.getElementById("postTags").value = "";
-      document.getElementById("postExcerpt").value = "";
-      document.getElementById("postBody").value = "";
-      editingSlug = null;
-    }
-
-    document.getElementById("postDate").value = new Date().toISOString().split("T")[0];
-
-    async function loadPostForEdit(slug) {
-      try {
-        const file = await gh("/repos/" + repo + "/contents/content/posts/" + slug);
-        const raw = b64Decode(file.content);
-        const parts = raw.split("---");
-        if (parts.length >= 3) {
-          const meta = parts[1];
-          const body = parts.slice(2).join("---").trim();
-          const title = meta.match(/title:\s*"?([^"\n]+)/);
-          const date = meta.match(/date:\s*"?([^"\n]+)/);
-          const tags = meta.match(/tags:\s*\[([^\]]+)\]/);
-          const excerpt = meta.match(/excerpt:\s*"?([^"\n]+)/);
-          if (title) document.getElementById("postTitle").value = title[1].trim();
-          if (date) document.getElementById("postDate").value = date[1].trim();
-          if (tags) document.getElementById("postTags").value = tags[1].split(",").map(t => t.trim().replace(/["']/g, "")).join(", ");
-          if (excerpt) document.getElementById("postExcerpt").value = excerpt[1].trim();
-          document.getElementById("postBody").value = body;
+function bindMediaEvents(){
+  const dz=document.getElementById("mediaDrop")
+  if(dz){
+    dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("dragover")})
+    dz.addEventListener("dragleave",()=>dz.classList.remove("dragover"))
+    dz.addEventListener("drop",async e=>{
+      e.preventDefault();dz.classList.remove("dragover")
+      if(!e.dataTransfer.files.length)return
+      for(const f of e.dataTransfer.files){
+        const folder=f.type.startsWith("video/")?"videos":"images"
+        const r=new FileReader()
+        r.onload=async function(ev){
+          const base64=ev.target.result.split(",")[1]
+          const n=Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9._-]/g,"")
+          try{await gh("/repos/"+repo+"/contents/public/"+folder+"/"+n,"PUT",{message:"上传: "+n,content:base64,branch});showMsg("✅ "+n,"success");loadTab("media")}catch(err){showMsg("失败: "+err.message,"error")}
         }
-        editingSlug = slug;
-        document.getElementById("publishStatus").textContent = "（将覆盖原文件）";
-      } catch (e) { showMsg("加载文章失败: " + e.message, "error"); }
+        r.readAsDataURL(f)
+      }
+    })
+  }
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async e=>{
+    e.stopPropagation()
+    const path=b.dataset.del
+    if(!confirm("删除 "+path+"？"))return
+    try{
+      const f=await gh("/repos/"+repo+"/contents/public"+path)
+      await gh("/repos/"+repo+"/contents/public"+path,"DELETE",{message:"删除 "+path,sha:f.sha,branch})
+      showMsg("✅ 已删除","success");loadTab("media")
+    }catch(err){showMsg("失败: "+err.message,"error")}
+  })
+  document.querySelectorAll(".grid-item").forEach(item=>item.onclick=function(){
+    const name=this.querySelector(".name")?.textContent
+    if(name){navigator.clipboard.writeText(name.includes(".mp4")||name.includes(".webm")?"/videos/"+name:"/images/"+name);showMsg("已复制链接","success")}
+  })
+}
+
+// ============ ALBUMS TAB ============
+async function renderAlbumsTab(){
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>相册管理</h2><button class='btn btn-primary btn-sm' onclick='showAlbumEditor()'>+ 新建相册</button></div>"
+  try{
+    const raw=await readFile("content/gallery.json")
+    const data=JSON.parse(raw)
+    if(!data.albums||!data.albums.length){html+="<p style='color:#71717a'>还没有相册</p>";return html}
+    for(const a of data.albums){
+      html+="<div class='album-item'><div class='album-info'><h3>"+a.title+"</h3><p>"+(a.type==="video"?"🎬 视频":"🖼️ 图片")+" · "+a.items.length+" 项 · "+a.description+"</p></div>"+
+        "<div class='flex'>"+
+        "<button class='btn btn-secondary btn-sm' data-action='edit-album' data-id='"+a.id+"'>编辑</button>"+
+        "<button class='btn btn-danger btn-sm' data-action='del-album' data-id='"+a.id+"'>删除</button>"+
+        "</div></div>"
     }
+  }catch(e){html+="<p style='color:#71717a'>还没有相册</p>"}
+  return html
+}
 
-    // ====== 格式化工具栏 ======
-    function insertTag(before, after) {
-      const ta = document.getElementById("postBody");
-      const start = ta.selectionStart, end = ta.selectionEnd;
-      const text = ta.value;
-      ta.value = text.slice(0, start) + before + text.slice(start, end) + after + text.slice(end);
-      const pos = start + before.length + (end - start) + after.length;
-      ta.selectionStart = ta.selectionEnd = pos - after.length;
-      ta.focus();
-    }
+function showAlbumEditor(editId=null){
+  const root=$id("appRoot")
+  root.innerHTML="<h1>"+(editId?"编辑":"新建")+"相册</h1><p class='sub'>设置相册信息</p><div id='msg'></div>"+
+    "<div class='card'>"+
+    "<label>相册名称</label><input id='aTitle' placeholder='我的相册'/>"+
+    "<label>类型</label><select id='aType'><option value='image'>🖼️ 图片</option><option value='video'>🎬 视频</option></select>"+
+    "<label>简介</label><textarea id='aDesc' rows='2'></textarea>"+
+    "<label>封面图链接</label><input id='aCover' placeholder='/images/cover.jpg'/>"+
+    "<hr style='border-color:#27272a;margin:16px 0'/>"+
+    "<h3 style='margin-bottom:12px'>添加内容</h3>"+
+    "<div id='aItems'></div>"+
+    "<button class='btn btn-secondary btn-sm' onclick='addAlbumItem()' style='margin-top:12px'>+ 添加一项</button>"+
+    "<hr style='border-color:#27272a;margin:16px 0'/>"+
+    "<div class='flex'><button class='btn btn-primary' onclick='saveAlbum(\""+(editId||"")+"\")'>💾 保存</button>"+
+    "<button class='btn btn-secondary' onclick='backToMain()'>← 返回</button></div></div>"
+  
+  let items=[{url:"",title:""}]
+  if(editId){loadAlbumForEdit(editId)}else{$id("aItems").innerHTML=renderAlbumItems(items)};window._albumItems=items
+}
 
-    function insertImage() {
-      const ta = document.getElementById("postBody");
-      const start = ta.selectionStart;
-      ta.value = ta.value.slice(0, start) + "![图片描述](/images/图片文件名.jpg)" + ta.value.slice(ta.selectionEnd);
-      ta.selectionStart = ta.selectionEnd = start + 6;
-      ta.focus();
-    }
+function renderAlbumItems(items){
+  return items.map((it,i)=>"<div class='flex' style='margin-bottom:8px'>"+
+    "<input placeholder='文件路径 如 /images/xxx.jpg' value='"+it.url+"' style='flex:1;margin:0' onchange='updateAlbumItem("+i+",\"url\",this.value)'/>"+
+    "<input placeholder='标题' value='"+it.title+"' style='flex:1;margin:0' onchange='updateAlbumItem("+i+",\"title\",this.value)'/>"+
+    "<button class='btn btn-danger btn-sm' onclick='removeAlbumItem("+i+")'>×</button></div>").join("")
+}
 
-    // ====== 发布 ======
-    async function publishPost() {
-      const title = document.getElementById("postTitle").value.trim();
-      const date = document.getElementById("postDate").value;
-      const tagsStr = document.getElementById("postTags").value.trim();
-      const excerpt = document.getElementById("postExcerpt").value.trim();
-      const body = document.getElementById("postBody").value.trim();
-      if (!title || !body) { showMsg("标题和正文不能为空", "error"); return; }
+function addAlbumItem(){
+  window._albumItems.push({url:"",title:""})
+  $id("aItems").innerHTML=renderAlbumItems(window._albumItems)
+}
 
-      const tags = tagsStr ? tagsStr.split(/[,，]/).map(t => t.trim()).filter(Boolean) : ["其他"];
-      const slug = editingSlug || title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-").replace(/^-|-$/g, "") + ".md";
+function updateAlbumItem(i,key,val){window._albumItems[i][key]=val}
+function removeAlbumItem(i){window._albumItems.splice(i,1);$id("aItems").innerHTML=renderAlbumItems(window._albumItems)}
 
-      const content = "---\n" +
-        'title: "' + title + '"\n' +
-        "date: " + date + "\n" +
-        "tags: [" + tags.map(t => '"' + t + '"').join(", ") + "]\n" +
-        'excerpt: "' + excerpt + '"\n' +
-        "---\n\n" + body + "\n";
+async function loadAlbumForEdit(id){
+  const raw=await readFile("content/gallery.json")
+  const data=JSON.parse(raw)
+  const a=data.albums.find(x=>x.id===id)
+  if(!a){showMsg("相册不存在","error");return}
+  $id("aTitle").value=a.title
+  $id("aType").value=a.type||"image"
+  $id("aDesc").value=a.description||""
+  $id("aCover").value=a.cover||""
+  window._albumItems=[...a.items.map(it=>({...it}))]
+  $id("aItems").innerHTML=renderAlbumItems(window._albumItems)
+}
 
-      const status = document.getElementById("publishStatus");
-      status.textContent = "发布中...";
+async function saveAlbum(editId){
+  const title=$id("aTitle").value.trim(),type=$id("aType").value,desc=$id("aDesc").value.trim()
+  const cover=$id("aCover").value.trim()
+  const items=window._albumItems.filter(it=>it.url.trim())
+  if(!title){showMsg("请输入相册名称","error");return}
+  const raw=await readFile("content/gallery.json")
+  const data=JSON.parse(raw)
+  const id=editId||title.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g,"-").replace(/^-|-$/g,"")
+  const album={id,title,type,description:desc,cover,items}
+  if(editId){
+    const idx=data.albums.findIndex(a=>a.id===editId)
+    if(idx>=0)data.albums[idx]=album
+  }else{data.albums.push(album)}
+  await writeFile("content/gallery.json",JSON.stringify(data,null,2),"更新相册: "+title)
+  showMsg("✅ 已保存","success");backToMain()
+}
 
-      try {
-        let sha = null;
-        if (editingSlug) {
-          try {
-            const existing = await gh("/repos/" + repo + "/contents/content/posts/" + editingSlug);
-            sha = existing.sha;
-          } catch (e) {}
-        }
-        await gh("/repos/" + repo + "/contents/content/posts/" + (editingSlug || slug), "PUT", {
-          message: editingSlug ? "更新文章: " + title : "新文章: " + title,
-          content: b64Encode(content), branch, sha
-        });
-        showMsg("✅ 文章已发布！等待自动部署...", "success");
-        status.textContent = "✅ 已发布";
-        hideEditor();
-        loadPosts();
-      } catch (e) { showMsg("发布失败: " + e.message, "error"); status.textContent = "❌ 失败"; }
-    }
+function bindAlbumsEvents(){
+  document.querySelectorAll("[data-action='edit-album']").forEach(b=>b.onclick=()=>showAlbumEditor(b.dataset.id))
+  document.querySelectorAll("[data-action='del-album']").forEach(b=>b.onclick=async()=>{
+    if(!confirm("删除这个相册？"))return
+    const raw=await readFile("content/gallery.json")
+    const data=JSON.parse(raw)
+    data.albums=data.albums.filter(a=>a.id!==b.dataset.id)
+    await writeFile("content/gallery.json",JSON.stringify(data,null,2),"删除相册: "+b.dataset.id)
+    showMsg("✅ 已删除","success");loadTab("albums")
+  })
+}
 
-    function editPost(slug) { showEditor(slug); }
-
-    async function deletePost(slug) {
-      if (!confirm("确定删除 " + slug + "？")) return;
-      try {
-        const file = await gh("/repos/" + repo + "/contents/content/posts/" + slug);
-        await gh("/repos/" + repo + "/contents/content/posts/" + slug, "DELETE", {
-          message: "删除文章: " + slug, sha: file.sha, branch
-        });
-        showMsg("✅ 文章已删除", "success");
-        loadPosts();
-      } catch (e) { showMsg("删除失败: " + e.message, "error"); }
-    }
-  </script>
+// ============ INIT ============
+render()
+</script>
 </body>
 </html>
-
