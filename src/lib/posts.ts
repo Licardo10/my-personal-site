@@ -26,7 +26,7 @@ export function getAllPosts(): Post[] {
       return {
         slug,
         title: data.title || slug,
-        date: data.date || "",
+        date: typeof data.date === 'string' ? data.date : String(data.date || ''),
         tags: data.tags || [],
         excerpt: data.excerpt || "",
         content,
@@ -43,7 +43,7 @@ export function getPostBySlug(slug: string): Post | null {
     return {
       slug,
       title: data.title || slug,
-      date: data.date || "",
+      date: typeof data.date === 'string' ? data.date : String(data.date || ''),
       tags: data.tags || [],
       excerpt: data.excerpt || "",
       content,
@@ -52,3 +52,4 @@ export function getPostBySlug(slug: string): Post | null {
     return null;
   }
 }
+
