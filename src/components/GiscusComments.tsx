@@ -18,9 +18,9 @@ export default function GiscusComments({ term }: Props) {
     script.async = true;
     script.crossOrigin = "anonymous";
     script.setAttribute("data-repo", "Licardo10/my-personal-site");
-    script.setAttribute("data-repo-id", "REPO_ID_PLACEHOLDER");
+    script.setAttribute("data-repo-id", "R_kgDOS1IvHQ");
     script.setAttribute("data-category", "General");
-    script.setAttribute("data-category-id", "CATEGORY_ID_PLACEHOLDER");
+    script.setAttribute("data-category-id", "DIC_kwDOS1IvHc4C-1fY");
     script.setAttribute("data-mapping", term ? "specific" : "pathname");
     script.setAttribute("data-term", term || "");
     script.setAttribute("data-strict", "0");
@@ -34,3 +34,4 @@ export default function GiscusComments({ term }: Props) {
 
   return <div ref={ref} className="mt-16" />;
 }
+
