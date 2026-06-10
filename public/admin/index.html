@@ -193,7 +193,8 @@ function renderMain(){
     '<button class="tab active" data-tab="posts">📄 文章</button>'+
     '<button class="tab" data-tab="media">🖼️ 媒体</button>'+
     '<button class="tab" data-tab="albums">📁 相册</button>'+
-    '<button class="tab" data-tab="homepage">🏠 主页</button>'+
+    '<button class="tab" data-tab="homepage">🏠 主界面</button>'+
+    '<button class="tab" data-tab="about">👤 关于我</button>'+
     '</div><div id="tabContent"></div>'
   
   root.querySelectorAll(".tab").forEach(t=>t.onclick=function(){
@@ -209,12 +210,12 @@ async function loadTab(name){
   try{
     if(name==="posts")ct.innerHTML=await renderPostsTab()
     else if(name==="media")ct.innerHTML=await renderMediaTab()
-    else if(name==="albums")ct.innerHTML=await renderAlbumsTab();else if(name==="homepage")ct.innerHTML=await renderHomepageTab()
+    else if(name==="albums")ct.innerHTML=await renderAlbumsTab();else if(name==="homepage")ct.innerHTML=await renderHomepageTab();else if(name==="about")ct.innerHTML=await renderAboutTab()
   }catch(e){ct.innerHTML="<div class='msg error'>加载失败: "+e.message+"</div>"}
   // Rebind events
   if(name==="posts")bindPostsEvents()
   else if(name==="media")bindMediaEvents()
-  else if(name==="albums")bindAlbumsEvents();else if(name==="homepage")bindHomepageEvents()
+  else if(name==="albums")bindAlbumsEvents();else if(name==="homepage")bindHomepageEvents();else if(name==="about")bindAboutEvents()
 }
 
 // ============ POSTS TAB ============
@@ -520,7 +521,7 @@ function bindAlbumsEvents(){
 
 // ============ HOMEPAGE TAB ============
 async function renderHomepageTab(){
-  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>主页设置</h2></div>"
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>主界面设置</h2></div>"
   try{
     const raw=await readFile("content/homepage.json")
     const data=JSON.parse(raw)
@@ -534,17 +535,57 @@ async function renderHomepageTab(){
 
 async function saveHomepage(){
   const data={heroTitle:$id("hHeroTitle").value.trim(),heroSubtitle:$id("hHeroSubtitle").value.trim()}
-  await writeFile("content/homepage.json",JSON.stringify(data,null,2),"更新主页设置")
+  await writeFile("content/homepage.json",JSON.stringify(data,null,2),"更新主界面设置")
   showMsg("✅ 主页已更新，2-3 分钟后生效","success")
 }
 
 function bindHomepageEvents(){}
+
+// ============ ABOUT TAB ============
+async function renderAboutTab(){
+  let html="<div class='flex' style='justify-content:space-between;margin-bottom:16px'><h2>关于我</h2></div>"
+  try{
+    const raw=await readFile("content/about.json")
+    const data=JSON.parse(raw)
+    html+="<div class='card'>"+
+      "<label>名字</label><input id='aName' value='"+data.name+"'/>"+
+      "<label>角色</label><input id='aRole' value='"+data.role+"'/>"+
+      "<label>头像文字</label><input id='aAvatar' placeholder='Y' value='"+data.avatar+"' maxlength='2'/>"+
+      "<label>所在地</label><input id='aLocation' value='"+data.location+"'/>"+
+      "<label>GitHub 链接</label><input id='aGithub' value='"+data.social.github+"'/>"+
+      "<label>邮箱</label><input id='aEmail' value='"+data.social.email+"'/>"+
+      "<label>个人简介（每行一段）</label><textarea id='aBio' rows='5'>"+(data.bio||[]).join("\n")+"</textarea>"+
+      "<label>技能（每行一个）</label><textarea id='aSkills' rows='5'>"+(data.skills||[]).join("\n")+"</textarea>"+
+      "<label>兴趣爱好（每行格式：图标代号,标题,描述）</label><textarea id='aHobbies' rows='4'>"+(data.hobbies||[]).map(h=>h.icon+","+h.title+","+h.desc).join("\n")+"</textarea>"+
+      "<button class='btn btn-primary' onclick='saveAbout()'>💾 保存</button></div>"
+  }catch(e){html+="<p class='msg error'>加载失败: "+e.message+"</p>"}
+  return html
+}
+
+async function saveAbout(){
+  const name=$id("aName").value.trim(),role=$id("aRole").value.trim()
+  const avatar=$id("aAvatar").value.trim()||"Y",location=$id("aLocation").value.trim()
+  const github=$id("aGithub").value.trim(),email=$id("aEmail").value.trim()
+  const bio=$id("aBio").value.trim().split("\n").filter(Boolean)
+  const skills=$id("aSkills").value.trim().split("\n").filter(Boolean)
+  const hobbies=$id("aHobbies").value.trim().split("\n").filter(Boolean).map(line=>{
+    const parts=line.split(",")
+    return {icon:parts[0]?.trim()||"Code2",title:parts[1]?.trim()||"",desc:parts[2]?.trim()||""}
+  })
+  const data={name,role,avatar,location,bio,skills,hobbies,social:{github,email}}
+  await writeFile("content/about.json",JSON.stringify(data,null,2),"更新关于我")
+  showMsg("✅ 关于我已更新，2-3 分钟后生效","success")
+}
+
+function bindAboutEvents(){}
 
 // ============ INIT ============
 render()
 </script>
 </body>
 </html>
+
+
 
 
 
