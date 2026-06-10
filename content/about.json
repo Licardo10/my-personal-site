@@ -1,18 +1,37 @@
 {
-  "name": "YuMo",
+  "name": "Lika",
   "role": "开发者 / 学习者",
-  "avatar": "Y",
-  "location": "China",
+  "avatar": "L",
+  "location": "中国-广东-深圳",
   "bio": [
-    "你好！我是一名热爱技术的开发者，目前正在寻找实习机会。我对 Web 开发、系统设计和新技术探索充满热情。",
-    "这个网站是我记录技术学习过程的空间——我会在这里分享技术文章的阅读笔记、实践项目的心得体会，以及一些生活中的摄影作品。",
+    "你好，我是一名热爱技术的开发者，目前正在寻找实习机会。我对新技术探索充满热情。",
+    "这个网站是我记录个人成长的空间——我会在这里分享技术文章的阅读笔记、实践项目的心得体会，以及一些生活中的点点滴滴。",
     "我相信持续学习是成长的关键，期待在未来的工作中不断提升自己，与优秀的团队一起创造有价值的产品。"
   ],
-  "skills": ["JavaScript / TypeScript", "React", "Vue.js", "Node.js", "Python", "Git", "Docker", "RESTful API", "SQL", "Linux"],
+  "skills": [
+    "C++",
+    "Python",
+    "Git",
+    "LangChain",
+    "RAG",
+    "ChromaDB"
+  ],
   "hobbies": [
-    { "icon": "Code2", "title": "编程", "desc": "探索新技术，构建有趣的项目" },
-    { "icon": "BookOpen", "title": "阅读", "desc": "技术书籍与文章" },
-    { "icon": "Camera", "title": "摄影", "desc": "用镜头记录生活的美好" }
+    {
+      "icon": "Code2",
+      "title": "编程",
+      "desc": "探索新技术，构建有趣的项目"
+    },
+    {
+      "icon": "BookOpen",
+      "title": "阅读",
+      "desc": "典籍与文章"
+    },
+    {
+      "icon": "Sport",
+      "title": "运动",
+      "desc": "排球/足球/游泳，在运动中提升自我"
+    }
   ],
   "social": {
     "github": "https://github.com/Licardo10",
