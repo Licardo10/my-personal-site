@@ -292,7 +292,7 @@ async function publishPost(slug){
   const t=$id("eTitle").value.trim(),d=$id("eDate").value,ts=$id("eTags").value.trim()
   const ex=$id("eExcerpt").value.trim(),b=$id("eBody").value.trim()
   if(!t||!b){showMsg("标题和正文不能为空","error");return}
-  const tags=ts?ts.split(/[,，]/).map(x=>x.trim()).filter(Boolean):["其他"];if(slug){try{const old=await gh("/repos/"+repo+"/contents/content/posts/"+slug);const raw=b64Decode(old.content);const pm=raw.match(/pinned:\s*(\w+)/);$id("ePinned").checked=pm&&pm[1]==="true"}}catch(e){}
+  const tags=ts?ts.split(/[,，]/).map(x=>x.trim()).filter(Boolean):["其他"];if(slug){try{const old=await gh("/repos/"+repo+"/contents/content/posts/"+slug);const raw=b64Decode(old.content);const pm=raw.match(/pinned:\s*(\w+)/);$id("ePinned").checked=pm&&pm[1]==="true"}catch(e){}}
   const fn=slug||t.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g,"-").replace(/^-|-$/g,"")+".md"
   const content="---\ntitle: \""+t+"\"\ndate: "+d+"\ntags: ["+tags.map(x=>'"'+x+'"').join(", ")+"]\npinned: "+($id("ePinned").checked?"true":"false")+"\nexcerpt: \""+ex+"\"\n---\n\n"+b+"\n"
   $id("eStatus").textContent="发布中..."
@@ -545,6 +545,7 @@ render()
 </script>
 </body>
 </html>
+
 
 
 
