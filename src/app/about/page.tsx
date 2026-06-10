@@ -1,7 +1,7 @@
-import { Github, Mail, MapPin, Code2, BookOpen, Camera } from "lucide-react";
+import { Github, Mail, MapPin, Code2, BookOpen, Camera, Dumbbell } from "lucide-react";
 import aboutData from "../../../content/about.json";
 
-const iconMap: Record<string, any> = { Code2, BookOpen, Camera };
+const iconMap: Record<string, any> = { Code2, BookOpen, Camera, Dumbbell };
 
 interface Hobby {
   icon: string;
@@ -91,3 +91,4 @@ export default function AboutPage() {
     </div>
   );
 }
+
