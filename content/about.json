@@ -14,7 +14,8 @@
     "Git",
     "LangChain",
     "RAG",
-    "ChromaDB"
+    "ChromaDB",
+    "FastAPI"
   ],
   "hobbies": [
     {
