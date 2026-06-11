@@ -1,1 +1,17 @@
-{"albums":[]}
+{
+  "albums": [
+    {
+      "id": "together",
+      "title": "Together",
+      "type": "image",
+      "description": "和bb在一起的照片",
+      "cover": "/images/1781153014194-.jpg",
+      "items": [
+        {
+          "url": "/images/1781153014194-.jpg",
+          "title": "4.26合照"
+        }
+      ]
+    }
+  ]
+}
