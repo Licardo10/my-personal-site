@@ -26,7 +26,7 @@ const items = files
   .map((file) => {
     const raw = fs.readFileSync(path.join(postsDir, file), "utf8");
     const { data, content } = matter(raw);
-    const slug = file.replace(/\.md$/, "");
+    const slug = data.slug || file.replace(/\.md$/, "");
     const excerpt = data.excerpt || content.slice(0, 200).replace(/[#*`\[\]()\n]/g, " ").trim();
     return {
       title: data.title || slug,
@@ -64,3 +64,4 @@ ${items
 
 fs.writeFileSync(path.join(outDir, "rss.xml"), rss);
 console.log(`RSS generated: ${items.length} items`);
+

@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "next start",
-    "postbuild": "node scripts/generate-rss.js",
+    "postbuild": "node scripts/generate-rss.js && node scripts/generate-sitemap.js",
     "dev": "next dev",
     "build": "next build",
     "lint": "next lint"
