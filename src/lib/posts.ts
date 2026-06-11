@@ -32,13 +32,13 @@ export interface Post {
 }
 
 function parsePost(fileName: string): Post {
-  const slug = fileName.replace(/\.md$/, "");
+  const fileSlug = fileName.replace(/\.md$/, "");
   const fullPath = path.join(postsDirectory, fileName);
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
   return {
-    slug,
-    title: data.title || slug,
+    slug: data.slug || fileSlug,
+    title: data.title || fileSlug,
     date: formatDate(data.date),
     tags: data.tags || [],
     excerpt: data.excerpt || "",
@@ -60,6 +60,12 @@ export function getAllPosts(): Post[] {
 
 export function getPostBySlug(slug: string): Post | null {
   try {
+    // Search by slug first
+    const all = getAllPosts();
+    const bySlug = all.find((p) => p.slug === slug);
+    if (bySlug) return bySlug;
+
+    // Fallback: try filename matching
     const fileName = `${slug}.md`;
     const fullPath = path.join(postsDirectory, fileName);
     if (!fs.existsSync(fullPath)) return null;
