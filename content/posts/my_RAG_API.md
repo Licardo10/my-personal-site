@@ -1,7 +1,7 @@
 ---
 title: "从零开始实现一个 RAG API 服务：ChromaDB + FastAPI 实战"
 date: 2026-06-11
-tags: ["RAG", "FastAPI", "ChromaDB", "AI"]
+tags: ["RAG", "FastAPI", "ChromaDB"]
 pinned: true
 excerpt: "从文本分块到向量检索，再到 LLM 生成和工具调用，一步步搭建一个可用的 RAG API 服务。"
 ---
