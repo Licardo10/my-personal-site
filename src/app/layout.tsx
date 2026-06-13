@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: { default: "YuMo", template: "%s | YuMo" },
+  title: { default: "Licardo", template: "%s | Licardo" },
   description: "技术笔记 · 摄影记录 · 个人博客",
 };
 
