@@ -227,6 +227,11 @@ async function renderPostsTab(){
     const data=await gh("/repos/"+repo+"/contents/content/posts")
     if(Array.isArray(data)&&data.length){
       const mds=data.filter(f=>f.name.endsWith(".md")).reverse()
+  const allTags=new Set();
+  mds.forEach(f=>{try{const raw=b64Decode(f.content);const tm=raw.match(/tags:\s*\[([^\]]*)\]/)
+  if(tm)tm[1].split(",").forEach(t=>{const ct=t.trim().replace(/"/g,"");if(ct)allTags.add(ct)})}catch(e){}});
+  window._allTags=Array.from(allTags).sort();
+
       for(const f of mds){
         try{
           const c=await gh("/repos/"+repo+"/contents/content/posts/"+f.name)
@@ -268,6 +273,7 @@ function showPostEditor(slug=null){
   
   $id("eDate").value=new Date().toISOString().split("T")[0]
   $id("publishBtn").onclick=()=>publishPost(slug)
+  setTimeout(()=>syncTagCheckboxes(),50)
   
   if(slug) loadPostForEdit(slug)
 }
@@ -308,6 +314,28 @@ async function publishPost(slug){
     setTimeout(()=>backToMain(),3000)
   }catch(e){showMsg("失败: "+e.message,"error");$id("eStatus").textContent="❌"}
 }
+
+function toggleTagDropdown(){
+  const d=$id("tagDropdown");
+  if(d.style.display==="none"){d.style.display="block";syncTagCheckboxes()}
+  else d.style.display="none"
+}
+function syncTagCheckboxes(){
+  const current=$id("eTags").value.split(/[,\uff0c]/).map(x=>x.trim()).filter(Boolean);
+  document.querySelectorAll("#tagDropdown input[type=checkbox]").forEach(cb=>{
+    cb.checked=current.includes(cb.value)
+  })
+}
+function toggleTag(tag){
+  const inp=$id("eTags");
+  const current=inp.value.split(/[,\uff0c]/).map(x=>x.trim()).filter(Boolean);
+  const idx=current.indexOf(tag);
+  if(idx>=0){current.splice(idx,1)}
+  else{current.push(tag)}
+  inp.value=current.join(",");
+  syncTagCheckboxes();
+}
+
 
 function insTag(before,after){
   const ta=$id("eBody"),start=ta.selectionStart,end=ta.selectionEnd
@@ -583,6 +611,8 @@ function bindAboutEvents(){}
 
 // ============ INIT ============
 render()
+
+document.addEventListener("click",function(e){const d=$id("tagDropdown");if(!d||d.style.display==="none")return;if(!e.target.closest("#tagDropdown")&&!e.target.closest("#tagDropdownBtn"))d.style.display="none"})
 </script>
 </body>
 </html>

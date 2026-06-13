@@ -4,6 +4,8 @@ import { Calendar, Tag, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import rehypeCodeLines from "@/lib/rehype-code-lines.js";
 import GiscusComments from "@/components/GiscusComments";
 
 export async function generateStaticParams() {
@@ -31,7 +33,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         </div>
       </header>
       <div className="prose prose-invert max-w-none prose-headings:text-white prose-a:text-accent prose-a:no-underline hover:prose-a:text-accent-light prose-code:text-accent-light prose-code:bg-dark-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-700 prose-blockquote:border-accent prose-blockquote:text-dark-300 prose-strong:text-white prose-img:rounded-lg prose-hr:border-dark-700">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeCodeLines]}>{post.content}</ReactMarkdown>
       </div>
       <GiscusComments />
     </article>
