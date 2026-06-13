@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: { default: "Licardo", template: "%s | Licardo" },
-  description: "技术笔记 · 摄影记录 · 个人博客",
+  description: "技术笔记 · 生活记录 · 个人博客",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
