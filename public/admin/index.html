@@ -227,7 +227,6 @@ async function renderPostsTab(){
     const data=await gh("/repos/"+repo+"/contents/content/posts")
     if(Array.isArray(data)&&data.length){
       const mds=data.filter(f=>f.name.endsWith(".md")).reverse()
-  const allTags=new Set();mds.forEach(f=>{try{const raw=b64Decode(f.content);const tm=raw.match(/tags:\s*\[([^\]]*)\]/);if(tm)tm[1].split(",").forEach(t=>{const ct=t.trim().replace(/"/g,"");if(ct)allTags.add(ct)})}catch(e){}});window._allTags=Array.from(allTags).sort();
 
       for(const f of mds){
         try{
@@ -272,7 +271,7 @@ function showPostEditor(slug=null){
   $id("publishBtn").onclick=()=>publishPost(slug)
   setTimeout(function(){addTagDropdown()},100)
   
-  if(slug) loadPostForEdit(slug)
+  if(slug) setTimeout(function(){loadPostForEdit(slug)},200)
 }
 
 async function loadPostForEdit(slug){
@@ -313,44 +312,62 @@ async function publishPost(slug){
 }
 function addTagDropdown(){
   var inp=$id("eTags");if(!inp)return;
-  if($id("tagDropdownBtn"))return; // already added
-  // Create dropdown button
+  if($id("tagDropdownBtn"))return;
   var btn=document.createElement("button");
   btn.id="tagDropdownBtn";
-  btn.textContent="\u6807\u7b7e\u5e93 \u25bc";
-  btn.style.cssText="position:absolute;right:0;top:0;padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px";
-  // Find eTags parent and make it relative
-  var parent=inp.parentElement;parent.style.position="relative";
-  parent.appendChild(btn);
-  // Create dropdown panel
+  btn.textContent="标签库 ▼";
+  btn.style.cssText="padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px;margin-left:8px";
+  inp.parentElement.style.display="flex";inp.parentElement.style.alignItems="center";
+  inp.after(btn);
+  // Panel
   var panel=document.createElement("div");
   panel.id="tagDropdown";
-  panel.style.cssText="display:none;position:absolute;right:0;top:32px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)";
-  parent.appendChild(panel);
+  panel.style.cssText="display:none;position:absolute;right:0;top:48px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)";
+  inp.parentElement.style.position="relative";
+  inp.parentElement.appendChild(panel);
+  // Load tags and build checkboxes
+  async function loadAndBuild(){
+    panel.innerHTML='<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">加载中...</p>';
+    try{
+      if(!window._allTags){
+        var list=await gh("/repos/"+repo+"/contents/content/posts");
+        var allTags=new Set();
+        for(var i=0;i<list.length;i++){
+          var f=list[i];
+          if(!f.name.endsWith(".md"))continue;
+          try{
+            var res=await gh("/repos/"+repo+"/contents/content/posts/"+f.name);
+            var raw=b64Decode(res.content);
+            var tm=raw.match(/tags:\s*\[([^\]]*)\]/);
+            if(tm)tm[1].split(",").forEach(function(t){var ct=t.trim().replace(/"/g,"");if(ct)allTags.add(ct)});
+          }catch(e){}
+        }
+        window._allTags=Array.from(allTags).sort();
+      }
+      panel.innerHTML="";
+      var tags=window._allTags||[];
+      if(tags.length===0){panel.innerHTML='<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">暂无已有标签</p>';return}
+      var current=inp.value.split(/[,，]/).map(function(x){return x.trim()}).filter(Boolean);
+      tags.forEach(function(tag){
+        var lb=document.createElement("label");
+        lb.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:#e4e4e7;font-size:13px";
+        var cb=document.createElement("input");cb.type="checkbox";cb.value=tag;cb.style.width="auto";cb.style.margin="0";
+        if(current.indexOf(tag)>=0)cb.checked=true;
+        cb.onchange=function(){
+          var cur=inp.value.split(/[,，]/).map(function(x){return x.trim()}).filter(Boolean);
+          var ti=cur.indexOf(tag);
+          if(ti>=0)cur.splice(ti,1);else cur.push(tag);
+          inp.value=cur.join(",");
+        };
+        lb.appendChild(cb);lb.appendChild(document.createTextNode(tag));
+        panel.appendChild(lb);
+      });
+    }catch(e){panel.innerHTML='<p style="color:#ef4444;font-size:12px;text-align:center;padding:8px">加载失败</p>'}
+  }
   btn.onclick=function(e){e.stopPropagation();
-    if(panel.style.display==="none"){panel.style.display="block";buildCheckboxes()}
+    if(panel.style.display==="none"){panel.style.display="block";loadAndBuild()}
     else panel.style.display="none"
   };
-  function buildCheckboxes(){
-    panel.innerHTML="";var tags=window._allTags||[];
-    if(tags.length===0){panel.innerHTML='<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">\u6682\u65e0\u5df2\u6709\u6807\u7b7e</p>';return}
-    var current=inp.value.split(/[,\uff0c]/).map(function(x){return x.trim()}).filter(Boolean);
-    tags.forEach(function(tag){
-      var lb=document.createElement("label");
-      lb.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:#e4e4e7;font-size:13px";
-      var cb=document.createElement("input");cb.type="checkbox";cb.value=tag;cb.style.width="auto";cb.style.margin="0";
-      if(current.indexOf(tag)>=0)cb.checked=true;
-      cb.onchange=function(){
-        var cur=inp.value.split(/[,\uff0c]/).map(function(x){return x.trim()}).filter(Boolean);
-        var ti=cur.indexOf(tag);
-        if(ti>=0)cur.splice(ti,1);else cur.push(tag);
-        inp.value=cur.join(",");
-      };
-      lb.appendChild(cb);lb.appendChild(document.createTextNode(tag));
-      panel.appendChild(lb);
-    });
-  }
-  // Close on outside click
   document.addEventListener("click",function(e){
     if(panel.style.display==="none")return;
     if(!e.target.closest("#tagDropdown")&&e.target!==btn)panel.style.display="none"
