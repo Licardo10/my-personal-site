@@ -227,10 +227,7 @@ async function renderPostsTab(){
     const data=await gh("/repos/"+repo+"/contents/content/posts")
     if(Array.isArray(data)&&data.length){
       const mds=data.filter(f=>f.name.endsWith(".md")).reverse()
-  const allTags=new Set();
-  mds.forEach(f=>{try{const raw=b64Decode(f.content);const tm=raw.match(/tags:\s*\[([^\]]*)\]/)
-  if(tm)tm[1].split(",").forEach(t=>{const ct=t.trim().replace(/"/g,"");if(ct)allTags.add(ct)})}catch(e){}});
-  window._allTags=Array.from(allTags).sort();
+  const allTags=new Set();mds.forEach(f=>{try{const raw=b64Decode(f.content);const tm=raw.match(/tags:\s*\[([^\]]*)\]/);if(tm)tm[1].split(",").forEach(t=>{const ct=t.trim().replace(/"/g,"");if(ct)allTags.add(ct)})}catch(e){}});window._allTags=Array.from(allTags).sort();
 
       for(const f of mds){
         try{
@@ -254,7 +251,7 @@ function showPostEditor(slug=null){
   root.innerHTML="<h1>"+existing+"文章</h1><p class='sub'>Markdown 格式</p><div id='msg'></div>"+
     "<div class='card'>"+
     "<label>标题</label><input id='eTitle' placeholder='文章标题'/>"+
-    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div><div style="position:relative;margin-bottom:18px"><button id="tagDropdownBtn" onclick="toggleTagDropdown()" style="position:absolute;right:0;top:0;padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px">标签库 ▼</button><div id="tagDropdown" style="display:none;position:absolute;right:0;top:32px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)">"+(window._allTags||[]).map(function(t){return "<label style="'display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:#e4e4e7;font-size:13px'" onmousedown='event.preventDefault()'><input type='checkbox' value='"+t+"' onchange='toggleTag('""+t+""')' style='width:auto;margin:0'/><span>"+t+"</span></label>"}).join("")+((window._allTags||[]).length===0?'<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">暂无已有标签</p>':"")+</div></div><label>自定义 URL（可选，英文+数字+连字符）</label><input id='eSlug' placeholder='留空则自动生成' style='font-family:monospace'/><label style='display:flex;align-items:center;gap:8px;margin-bottom:14px'><input type='checkbox' id='ePinned' style='width:auto;margin:0'/> 置顶文章</label>"+
+    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div><label>自定义 URL（可选，英文+数字+连字符）</label><input id='eSlug' placeholder='留空则自动生成' style='font-family:monospace'/><label style='display:flex;align-items:center;gap:8px;margin-bottom:14px'><input type='checkbox' id='ePinned' style='width:auto;margin:0'/> 置顶文章</label>"+
     "<label>简介</label><textarea id='eExcerpt' rows='2'></textarea>"+
     "<label>正文</label>"+
     "<div class='flex' style='margin-bottom:8px'>"+
@@ -273,6 +270,7 @@ function showPostEditor(slug=null){
   
   $id("eDate").value=new Date().toISOString().split("T")[0]
   $id("publishBtn").onclick=()=>publishPost(slug)
+  setTimeout(function(){addTagDropdown()},100)
   
   if(slug) loadPostForEdit(slug)
 }
@@ -313,27 +311,52 @@ async function publishPost(slug){
     setTimeout(()=>backToMain(),3000)
   }catch(e){showMsg("失败: "+e.message,"error");$id("eStatus").textContent="❌"}
 }
+function addTagDropdown(){
+  var inp=$id("eTags");if(!inp)return;
+  if($id("tagDropdownBtn"))return; // already added
+  // Create dropdown button
+  var btn=document.createElement("button");
+  btn.id="tagDropdownBtn";
+  btn.textContent="\u6807\u7b7e\u5e93 \u25bc";
+  btn.style.cssText="position:absolute;right:0;top:0;padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px";
+  // Find eTags parent and make it relative
+  var parent=inp.parentElement;parent.style.position="relative";
+  parent.appendChild(btn);
+  // Create dropdown panel
+  var panel=document.createElement("div");
+  panel.id="tagDropdown";
+  panel.style.cssText="display:none;position:absolute;right:0;top:32px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)";
+  parent.appendChild(panel);
+  btn.onclick=function(e){e.stopPropagation();
+    if(panel.style.display==="none"){panel.style.display="block";buildCheckboxes()}
+    else panel.style.display="none"
+  };
+  function buildCheckboxes(){
+    panel.innerHTML="";var tags=window._allTags||[];
+    if(tags.length===0){panel.innerHTML='<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">\u6682\u65e0\u5df2\u6709\u6807\u7b7e</p>';return}
+    var current=inp.value.split(/[,\uff0c]/).map(function(x){return x.trim()}).filter(Boolean);
+    tags.forEach(function(tag){
+      var lb=document.createElement("label");
+      lb.style.cssText="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:#e4e4e7;font-size:13px";
+      var cb=document.createElement("input");cb.type="checkbox";cb.value=tag;cb.style.width="auto";cb.style.margin="0";
+      if(current.indexOf(tag)>=0)cb.checked=true;
+      cb.onchange=function(){
+        var cur=inp.value.split(/[,\uff0c]/).map(function(x){return x.trim()}).filter(Boolean);
+        var ti=cur.indexOf(tag);
+        if(ti>=0)cur.splice(ti,1);else cur.push(tag);
+        inp.value=cur.join(",");
+      };
+      lb.appendChild(cb);lb.appendChild(document.createTextNode(tag));
+      panel.appendChild(lb);
+    });
+  }
+  // Close on outside click
+  document.addEventListener("click",function(e){
+    if(panel.style.display==="none")return;
+    if(!e.target.closest("#tagDropdown")&&e.target!==btn)panel.style.display="none"
+  });
+}
 
-function toggleTagDropdown(){
-  const d=$id("tagDropdown");
-  if(d.style.display==="none"){d.style.display="block";syncTagCheckboxes()}
-  else d.style.display="none"
-}
-function syncTagCheckboxes(){
-  const current=$id("eTags").value.split(/[,\uff0c]/).map(x=>x.trim()).filter(Boolean);
-  document.querySelectorAll("#tagDropdown input[type=checkbox]").forEach(cb=>{
-    cb.checked=current.includes(cb.value)
-  })
-}
-function toggleTag(tag){
-  const inp=$id("eTags");
-  const current=inp.value.split(/[,\uff0c]/).map(x=>x.trim()).filter(Boolean);
-  const idx=current.indexOf(tag);
-  if(idx>=0){current.splice(idx,1)}
-  else{current.push(tag)}
-  inp.value=current.join(",");
-  syncTagCheckboxes();
-}
 
 
 // ============ MEDIA TAB ============
@@ -591,7 +614,6 @@ function bindAboutEvents(){}
 render()
 
 
-document.addEventListener("click",function(e){const d=$id("tagDropdown");if(!d||d.style.display==="none")return;if(!e.target.closest("#tagDropdown")&&!e.target.closest("#tagDropdownBtn"))d.style.display="none"})
 </script>
 </body>
 </html>
