@@ -316,13 +316,13 @@ function addTagDropdown(){
   var btn=document.createElement("button");
   btn.id="tagDropdownBtn";
   btn.textContent="标签库 ▼";
-  btn.style.cssText="padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px;margin-left:8px";
-  inp.parentElement.style.display="flex";inp.parentElement.style.alignItems="center";
-  inp.after(btn);
+  btn.style.cssText="position:absolute;right:0;top:0;padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px";
+  
+  inp.style.paddingRight="90px";inp.parentElement.appendChild(btn);
   // Panel
   var panel=document.createElement("div");
   panel.id="tagDropdown";
-  panel.style.cssText="display:none;position:absolute;right:0;top:48px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)";
+  panel.style.cssText="display:none;position:absolute;right:0;top:36px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)";
   inp.parentElement.style.position="relative";
   inp.parentElement.appendChild(panel);
   // Load tags and build checkboxes
@@ -375,6 +375,18 @@ function addTagDropdown(){
 }
 
 
+
+function bindPostsEvents(){
+  document.querySelectorAll("[data-action='edit-post']").forEach(function(b){b.onclick=function(){showPostEditor(b.dataset.slug)}});
+  document.querySelectorAll("[data-action='del-post']").forEach(function(b){b.onclick=async function(){
+    if(!confirm("\u5220\u9664 "+b.dataset.slug+"\uff1f"))return;
+    try{
+      var f=await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug);
+      await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug,"DELETE",{message:"\u5220\u9664\u6587\u7ae0: "+b.dataset.slug,sha:f.sha,branch:branch});
+      showMsg("\u2705 \u5df2\u5220\u9664\uff0c\u5c06\u5728 2-3 \u5206\u949f\u540e\u540c\u6b65\u5230\u7f51\u7ad9","success");loadTab("posts")
+    }catch(e){showMsg("\u5931\u8d25: "+e.message,"error")}
+  }});
+}
 
 // ============ MEDIA TAB ============
 async function renderMediaTab(){
