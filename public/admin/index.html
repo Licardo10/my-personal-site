@@ -254,7 +254,7 @@ function showPostEditor(slug=null){
   root.innerHTML="<h1>"+existing+"文章</h1><p class='sub'>Markdown 格式</p><div id='msg'></div>"+
     "<div class='card'>"+
     "<label>标题</label><input id='eTitle' placeholder='文章标题'/>"+
-    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div><label>自定义 URL（可选，英文+数字+连字符）</label><input id='eSlug' placeholder='留空则自动生成' style='font-family:monospace'/><label style='display:flex;align-items:center;gap:8px;margin-bottom:14px'><input type='checkbox' id='ePinned' style='width:auto;margin:0'/> 置顶文章</label>"+
+    "<div class='row'><div><label>日期</label><input type='date' id='eDate'/></div><div><label>标签</label><input id='eTags' placeholder='React, 前端'/></div></div><div style="position:relative;margin-bottom:18px"><button id="tagDropdownBtn" onclick="toggleTagDropdown()" style="position:absolute;right:0;top:0;padding:4px 10px;border-radius:6px;border:1px solid #27272a;background:#18181b;color:#a1a1aa;cursor:pointer;font-size:12px">标签库 ▼</button><div id="tagDropdown" style="display:none;position:absolute;right:0;top:32px;width:240px;max-height:180px;overflow-y:auto;background:#18181b;border:1px solid #27272a;border-radius:8px;z-index:100;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5)">"+(window._allTags||[]).map(function(t){return "<label style="'display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:#e4e4e7;font-size:13px'" onmousedown='event.preventDefault()'><input type='checkbox' value='"+t+"' onchange='toggleTag('""+t+""')' style='width:auto;margin:0'/><span>"+t+"</span></label>"}).join("")+((window._allTags||[]).length===0?'<p style="color:#71717a;font-size:12px;text-align:center;padding:8px">暂无已有标签</p>':"")+</div></div><label>自定义 URL（可选，英文+数字+连字符）</label><input id='eSlug' placeholder='留空则自动生成' style='font-family:monospace'/><label style='display:flex;align-items:center;gap:8px;margin-bottom:14px'><input type='checkbox' id='ePinned' style='width:auto;margin:0'/> 置顶文章</label>"+
     "<label>简介</label><textarea id='eExcerpt' rows='2'></textarea>"+
     "<label>正文</label>"+
     "<div class='flex' style='margin-bottom:8px'>"+
@@ -273,7 +273,6 @@ function showPostEditor(slug=null){
   
   $id("eDate").value=new Date().toISOString().split("T")[0]
   $id("publishBtn").onclick=()=>publishPost(slug)
-  setTimeout(()=>syncTagCheckboxes(),50)
   
   if(slug) loadPostForEdit(slug)
 }
@@ -336,27 +335,6 @@ function toggleTag(tag){
   syncTagCheckboxes();
 }
 
-
-function insTag(before,after){
-  const ta=$id("eBody"),start=ta.selectionStart,end=ta.selectionEnd
-  ta.value=ta.value.slice(0,start)+before+ta.value.slice(start,end)+after+ta.value.slice(end)
-  ta.selectionStart=ta.selectionEnd=start+before.length
-  ta.focus()
-}
-
-function backToMain(){renderMain()}
-
-function bindPostsEvents(){
-  document.querySelectorAll("[data-action='edit-post']").forEach(b=>b.onclick=()=>showPostEditor(b.dataset.slug))
-  document.querySelectorAll("[data-action='del-post']").forEach(b=>b.onclick=async ()=>{
-    if(!confirm("删除 "+b.dataset.slug+"？"))return
-    try{
-      const f=await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug)
-      await gh("/repos/"+repo+"/contents/content/posts/"+b.dataset.slug,"DELETE",{message:"删除文章: "+b.dataset.slug,sha:f.sha,branch})
-      showMsg("✅ 已删除，将在 2-3 分钟后同步到网站","success");loadTab("posts")
-    }catch(e){showMsg("失败: "+e.message,"error")}
-  })
-}
 
 // ============ MEDIA TAB ============
 async function renderMediaTab(){
@@ -611,6 +589,7 @@ function bindAboutEvents(){}
 
 // ============ INIT ============
 render()
+
 
 document.addEventListener("click",function(e){const d=$id("tagDropdown");if(!d||d.style.display==="none")return;if(!e.target.closest("#tagDropdown")&&!e.target.closest("#tagDropdownBtn"))d.style.display="none"})
 </script>
